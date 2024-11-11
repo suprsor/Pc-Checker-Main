@@ -326,6 +326,3 @@ function Main {
 
  
 }
-Main
-
-☺
