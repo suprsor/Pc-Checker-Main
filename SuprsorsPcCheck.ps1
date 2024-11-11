@@ -323,7 +323,7 @@ Write-Host "`n$space╭───────────────────
 Write-Host "$space│            SCAN COMPLETE            │" -ForegroundColor $red
 Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $red
 
-# Print the magenta border and text
-Write-Host "$space╭─────────────────────────────────────╮" -ForegroundColor $magenta
-Write-Host "$space│          Discord @Suprsors         │" -ForegroundColor $magenta
+# Print the red "Discord @Suprsors" line with more white space to the right
+Write-Host "`n$space╭─────────────────────────────────────╮" -ForegroundColor $magenta
+Write-Host "$space│        Discord @Suprsors            │" -ForegroundColor $magenta
 Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $magenta
