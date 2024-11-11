@@ -265,7 +265,7 @@ function Send-Logs {
     $logFilePath = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
 
     if (Test-Path $logFilePath) {
-        $url = "http://192.168.4.128:5000/webhook"
+        $url = "http://127.0.0.1:5000/webhook"
 
         $fileContent = Get-Content -Path $logFilePath -Raw
 
