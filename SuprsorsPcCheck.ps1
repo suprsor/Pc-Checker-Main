@@ -7,32 +7,23 @@ $darkRed = [System.ConsoleColor]::DarkRed
 $white = [System.ConsoleColor]::White
 
 $art = @"
-⠀⠀⠀⠀⠀⠀⠀⣤⢔⣒⠂⣀⣀⣤⣄⣀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⣴⣿⠋⢠⣟⡼⣷⠼⣆⣼⢇⣿⣄⠱⣄
-⠀⠀⠀⠀⠀⠀⠀⠹⣿⡀⣆⠙⠢⠐⠉⠉⣴⣾⣽⢟⡰⠃
-⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣦⠀⠤⢴⣿⠿⢋⣴⡏⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡙⠻⣿⣶⣦⣭⣉⠁⣿⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣷⠀⠈⠉⠉⠉⠉⠇⡟⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⢀⠀⠀⣘⣦⣀⠀⠀⣀⡴⠊⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠛⢻⣿⣿⣿⣿⠻⣧⡀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠫⣿⠉⠻⣇⠘⠓⠂⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⢶⣾⣿⣿⣿⣿⣿⣶⣄⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣧⠀⢸⣿⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠈⠙⠻⢿⣿⣿⠿⠛⣄⢸⡇⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⡇⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡁⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿                             
+                 ▄████▄   ▄████▄
+                 ██▀ ▀█   ██▀ ▀█
+                ▒▓█  ▄▄▄  ▓█  ▄▄▄
+                ▒▓▓▄ ▄██▒▒▓▓▄ ▄██░
+               ░▒ ▓███▀ ░░ ▓███▀░▒ 
+               ░░ ░▒ ▒  ░  ▒ ░░▒
+                  ░  ▒     ▒ ░▒
+                ░         ░   ░ 
+                   ░     ░  ░ 
+                            ░                             
 "@
 
 foreach ($char in $art.ToCharArray()) {
     if ($char -match '[▒░▓]') {
         Write-Host $char -ForegroundColor $darkRed -NoNewline
     } else {
-        Write-Host $char -ForegroundColor $Red -NoNewline
+        Write-Host $char -ForegroundColor $white -NoNewline
     }
 }
 function Get-OneDrivePath {
@@ -320,13 +311,11 @@ $red = "Red"
 $space = " " * 12  # Increased the number of spaces for more right alignment
 
 # Print the red "SCAN COMPLETE" line with more white space to the right
-Write-Host "`n$space╭─────────────────────────────────────╮" -ForegroundColor $Red
-Write-Host "$space│            SCAN COMPLETE            │" -ForegroundColor $Green
-Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $White
+Write-Host "`n$space╭─────────────────────────────────────╮" -ForegroundColor $red
+Write-Host "$space│            SCAN COMPLETE            │" -ForegroundColor $red
+Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $red
 
-# Print the red "Discord @supsrors" line with more white space to the right
-Write-Host "`n$space╭─────────────────────────────────────╮" -ForegroundColor $Red
-Write-Host "$space│            Discord @Suprsors        │" -ForegroundColor $Green
-Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $White
-
-# 
+# Print the red "Discord @Suprsors" line with more white space to the right
+Write-Host "'n$space╭─────────────────────────────────────╮" -ForegroundColor $magenta
+Write-Host "$space│          Discord @Suprsors          │" -ForegroundColor $magenta
+Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $magenta
