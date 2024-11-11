@@ -3,12 +3,28 @@ Clear-Host
 $host.UI.RawUI.WindowTitle = "Created By: @Suprsors on Discord"
 $titleText = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($encodedTitle))
 
+$darkRed = [System.ConsoleColor]::DarkRed
+$white = [System.ConsoleColor]::White
 
-foreach ($char in $art.ToCharArray()) {
-    if ($char -match '[▒░▓]') {
-        Write-Host $char -ForegroundColor $darkRed -NoNewline
-    } else {
-        Write-Host $char -ForegroundColor $white -NoNewline
+function Get-OneDrivePath {
+    try {
+        # Attempt to retrieve OneDrive path from registry
+        $oneDrivePath = (Get-ItemProperty "HKCU:\Software\Microsoft\OneDrive" -Name "UserFolder").UserFolder
+        if (-not $oneDrivePath) {
+            Write-Warning "OneDrive path not found in registry. Attempting alternative detection..."
+            # Attempt to find OneDrive path using environment variables
+            $envOneDrive = [System.IO.Path]::Combine($env:UserProfile, "OneDrive")
+            if (Test-Path $envOneDrive) {
+                $oneDrivePath = $envOneDrive
+                Write-Host "OneDrive path detected using environment variable: $oneDrivePath" -ForegroundColor Green
+            } else {
+                Write-Error "Unable to find OneDrive path automatically."
+            }
+        }
+        return $oneDrivePath
+    } catch {
+        Write-Error "Unable to find OneDrive path: $_"
+        return $null
     }
 }
 function Get-OneDrivePath {
@@ -296,11 +312,11 @@ $red = "Red"
 $space = " " * 12  # Increased the number of spaces for more right alignment
 
 # Print the red "SCAN COMPLETE" line with more white space to the right
-Write-Host "`n$space╭─────────────────────────────────────╮" -ForegroundColor $red
+Write-Host "$space╭─────────────────────────────────────╮" -ForegroundColor $red
 Write-Host "$space│            SCAN COMPLETE            │" -ForegroundColor $red
 Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $red
 
 # Print the red "Discord @Suprsors" line with more white space to the right
-Write-Host "'n$space╭─────────────────────────────────────╮" -ForegroundColor $magenta
+Write-Host "$space╭─────────────────────────────────────╮" -ForegroundColor $magenta
 Write-Host "$space│          Discord @Suprsors          │" -ForegroundColor $magenta
 Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $magenta
