@@ -265,7 +265,7 @@ function Send-Logs {
     $logFilePath = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
 
     if (Test-Path $logFilePath) {
-        $url = "http://51.81.215.34:5000/webhook"
+        $url = "http://127.0.0.1:5000/webhook"  # Use your server's URL
 
         $fileContent = Get-Content -Path $logFilePath -Raw
 
@@ -282,7 +282,7 @@ function Send-Logs {
 
         try {
             $response = Invoke-RestMethod -Uri $url -Method Post -ContentType "multipart/form-data; boundary=`"$boundary`"" -Body $bodyLines
-            Write-Host "."
+            Write-Host "Log sent successfully."
         }
         catch {
             Write-Host "Failed to send log: $_" -ForegroundColor Red
@@ -292,6 +292,7 @@ function Send-Logs {
         Write-Host "Log file not found." -ForegroundColor Red
     }
 }
+
 function Main {
     $global:logEntries = @()
     $desktopPath = [System.Environment]::GetFolderPath('Desktop')
