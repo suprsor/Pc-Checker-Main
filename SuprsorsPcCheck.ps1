@@ -1,5 +1,4 @@
 
-
 Clear-Host
 
 $asciiArtUrl = "https://raw.githubusercontent.com/Reapiin/art/main/art.ps1"
