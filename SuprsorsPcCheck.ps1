@@ -302,12 +302,4 @@ function Main {
     $url = "https://raw.githubusercontent.com/Reapiin/art/main/credits"
     $content = Invoke-RestMethod -Uri $url
     Invoke-Expression $content
-
-
-
-
-
-}
-Main
-
-☺
+exit
