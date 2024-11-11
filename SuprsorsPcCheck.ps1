@@ -28,7 +28,7 @@ function Decrypt-ValidationLogic {
 
 Clear-Host
 
-$asciiArtUrl = "https://raw.githubusercontent.com/suprsor/Art/refs/heads/main/.github/workflows/art.ps1"
+$asciiArtUrl = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Art.ps1"
 $asciiArtScript = Invoke-RestMethod -Uri $asciiArtUrl
 Invoke-Expression $asciiArtScript
 
@@ -353,7 +353,7 @@ function Main {
 
     $userProfile = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile)
     $downloadsPath = Join-Path -Path $userProfile -ChildPath "Downloads"
-    $url = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/.github/workflows/Credits.ps1"
+    $url = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/credits.ps1"
     $content = Invoke-RestMethod -Uri $url
     
 
