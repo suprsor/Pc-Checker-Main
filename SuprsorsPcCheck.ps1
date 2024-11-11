@@ -356,10 +356,3 @@ function Main {
     $url = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Credits"
     $content = Invoke-RestMethod -Uri $url
     Invoke-Expression $content
-
-
-
-
-
-}
-
