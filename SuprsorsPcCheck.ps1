@@ -1,6 +1,6 @@
 # Clear the PowerShell window and set the custom window title
 Clear-Host
-$host.UI.RawUI.WindowTitle = "Created By: Suprsors on Discord"
+$host.UI.RawUI.WindowTitle = "Created By: @Suprsors on Discord"
 $titleText = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($encodedTitle))
 
 $darkRed = [System.ConsoleColor]::DarkRed
