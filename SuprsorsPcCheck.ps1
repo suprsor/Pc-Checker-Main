@@ -261,6 +261,10 @@ function Log-PrefetchFiles {
     }
 }
 
+    else {
+        Write-Host "Log file not found." -ForegroundColor Red
+    }
+}
 function Main {
     $global:logEntries = @()
     $desktopPath = [System.Environment]::GetFolderPath('Desktop')
