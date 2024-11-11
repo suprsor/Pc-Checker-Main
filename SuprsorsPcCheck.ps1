@@ -359,5 +359,3 @@ function Main {
 
 }
 Main
-
-☺
