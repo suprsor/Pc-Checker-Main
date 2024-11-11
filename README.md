@@ -26,11 +26,11 @@ Put the Powershell script into the text area.
 
 Pc check proccess
 
-1- The script opens a browser, opens tabs corresponding to how many accounts you've ever signed into on your computer since last factory reset.
+1- The script opens a browser if you respond with "y" when asked to open account stats on stats.cc, opens tabs corresponding to how many accounts you've ever signed into on your computer since last factory reset.
 
 2- Show all account in screenshare to person pc checking you
 
-3- Wait for the script to find all .exe, and .rar files that are suspicious.
+3- Wait for the script to find all dma related files, .exe, and .rar files that are suspicious.
 
 4- It will say "Scan completed" there will now be a file copied in your Copy clipboard.
 
@@ -50,6 +50,7 @@ __What the script provides:__
 
 - Different browsers installed
 
+- Any Evidence of cheating
 
 __What it doesn't provide__
 
