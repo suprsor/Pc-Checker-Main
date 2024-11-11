@@ -1,6 +1,3 @@
-# Set encoding to UTF-8
-[System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8
-
 # Clear the PowerShell window and set the custom window title
 Clear-Host
 $host.UI.RawUI.WindowTitle = "Created By: Suprsors on Discord"
