@@ -48,7 +48,11 @@ function Check-SecureBoot {
     try {
         if (Get-Command Confirm-SecureBootUEFI -ErrorAction Stop) {
             $secureBootState = Confirm-SecureBootUEFI
-            Log-Message "Secure Boot is $($secureBootState ? 'ON' : 'OFF')."
+            if ($secureBootState) {
+                Log-Message "Secure Boot is ON."
+            } else {
+                Log-Message "Secure Boot is OFF."
+            }
         } else {
             Log-Message "Secure Boot not available on this system." "WARNING"
         }
