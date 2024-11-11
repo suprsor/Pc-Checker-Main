@@ -1,6 +1,6 @@
 # Pc-Checker-Main
 
-Step 1) 
+**Step 1) **
 
 Open windows powershell as an administrator by:
 
@@ -12,7 +12,7 @@ Open windows powershell as an administrator by:
 
 4- Press Run as Administrator
 
-Step 2) 
+**Step 2) **
 
 Put the Powershell script into the text area.
 
@@ -22,7 +22,7 @@ Put the Powershell script into the text area.
 
 3- Press enter.
 
-Step 3) 
+**Step 3) **
 
 Pc check proccess
 
@@ -38,25 +38,25 @@ Pc check proccess
 
 6- Send the file and the person pc checking you will review all suspicious files.
 
-What the script provides:
+__What the script provides:__
 
-All Ubisoft User IDS, no passwords are  given in logfile. 
+- All Ubisoft User IDS, no passwords are  given in logfile. 
 
-All .exe .rar files you have
+- All .exe .rar files you have
 
-Windows installation date
+- Windows installation date
 
-Suspicous files
+- Suspicous files
 
-Different browsers you use
+- Different browsers installed
 
 
-What it doesn't provide
+__What it doesn't provide__
 
-Direct access to your computer
+- Direct access to your computer
 
-And passwords/emails
+- And passwords/emails
 
-Any Ip addresses/personal information
+- Any Ip addresses/personal information
 
-NO login information
+- NO login information
