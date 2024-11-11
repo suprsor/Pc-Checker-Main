@@ -1,13 +1,13 @@
 # Clear the PowerShell window and set the custom window title
 Clear-Host
-$host.UI.RawUI.WindowTitle = "Created By:Suprsors on Discord"
+$host.UI.RawUI.WindowTitle = "Created By: Suprsors on Discord"
 $titleText = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($encodedTitle))
 
 $darkRed = [System.ConsoleColor]::DarkRed
 $white = [System.ConsoleColor]::White
 
 $art = @"
-⠀⠀⠀⠀⠀⠀⠀⣤⢔⣒⠂⣀⣀⣤⣄⣀⠀⠀
+ ⠀⠀⠀⠀⠀⠀⠀⣤⢔⣒⠂⣀⣀⣤⣄⣀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⣴⣿⠋⢠⣟⡼⣷⠼⣆⣼⢇⣿⣄⠱⣄
 ⠀⠀⠀⠀⠀⠀⠀⠹⣿⡀⣆⠙⠢⠐⠉⠉⣴⣾⣽⢟⡰⠃
 ⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⣦⠀⠤⢴⣿⠿⢋⣴⡏⠀⠀
@@ -25,14 +25,14 @@ $art = @"
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠁⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿                             
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿                                          
 "@
 
 foreach ($char in $art.ToCharArray()) {
     if ($char -match '[▒░▓]') {
         Write-Host $char -ForegroundColor $darkRed -NoNewline
     } else {
-        Write-Host $char -ForegroundColor $Red -NoNewline
+        Write-Host $char -ForegroundColor $white -NoNewline
     }
 }
 function Get-OneDrivePath {
@@ -320,11 +320,11 @@ $red = "Red"
 $space = " " * 12  # Increased the number of spaces for more right alignment
 
 # Print the red "SCAN COMPLETE" line with more white space to the right
-Write-Host "`n$space╭─────────────────────────────────────╮" -ForegroundColor $Red
-Write-Host "$space│            SCAN COMPLETE            │" -ForegroundColor $Green
-Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $White
+Write-Host "`n$space╭─────────────────────────────────────╮" -ForegroundColor $red
+Write-Host "$space│            SCAN COMPLETE            │" -ForegroundColor $red
+Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $red
 
 # Print the magenta border and text
 Write-Host "$space╭─────────────────────────────────────╮" -ForegroundColor $magenta
-Write-Host "$space│          Discord @Suprsors        │" -ForegroundColor $Red
+Write-Host "$space│          Discord @Suprsors        │" -ForegroundColor $magenta
 Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $magenta
