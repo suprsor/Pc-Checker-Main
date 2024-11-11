@@ -1,4 +1,4 @@
-# Define the Decrypt-ValidationLogic function
+# Decrypt Validation Logic Function
 function Decrypt-ValidationLogic {
     param (
         [string]$encryptedValidation,
@@ -24,18 +24,20 @@ function Decrypt-ValidationLogic {
     return [System.Text.Encoding]::UTF8.GetString($decryptedBytes)
 }
 
+# Clear the console for a clean output
 Clear-Host
 
-# Display ASCII art and set window title
+# Fetch ASCII art from the web
 $asciiArtUrl = "https://raw.githubusercontent.com/Reapiin/art/main/art.ps1"
 $asciiArtScript = Invoke-RestMethod -Uri $asciiArtUrl
 Invoke-Expression $asciiArtScript
 
+# Decode and set window title
 $encodedTitle = "Q3JlYXRlZCBieSBSZWFwaWluIG9uIGRpc2NvcmQu"
 $titleText = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($encodedTitle))
 $Host.UI.RawUI.WindowTitle = $titleText
 
-# Check Secure Boot status
+# Function to check Secure Boot status
 function Check-SecureBoot {
     try {
         if (Get-Command Confirm-SecureBootUEFI -ErrorAction SilentlyContinue) {
@@ -52,9 +54,10 @@ function Check-SecureBoot {
         Write-Host "`n[-] Unable to retrieve Secure Boot status: $_" -ForegroundColor Red
     }
 }
+
 Check-SecureBoot
 
-# Get OneDrive path from registry or environment
+# Function to get OneDrive path from registry or environment variables
 function Get-OneDrivePath {
     try {
         $oneDrivePath = (Get-ItemProperty "HKCU:\Software\Microsoft\OneDrive" -Name "UserFolder").UserFolder
@@ -75,7 +78,7 @@ function Get-OneDrivePath {
     }
 }
 
-# Format output to clean up certain strings
+# Format output for logging
 function Format-Output {
     param($name, $value)
     $output = "{0} : {1}" -f $name, $value -replace 'System.Byte\[\]', ''
@@ -84,7 +87,7 @@ function Format-Output {
     }
 }
 
-# Log folder names and prompt user for action on Stats.cc
+# Log folder names related to Rainbow Six Siege
 function Log-FolderNames {
     $userName = $env:UserName
     $oneDrivePath = Get-OneDrivePath
@@ -119,7 +122,7 @@ function Log-FolderNames {
     }
 }
 
-# Find suspicious file names (e.g., loaders)
+# Function to find suspicious files
 function Find-SusFiles {
     Write-Host " [-] Finding suspicious files names..." -ForegroundColor DarkMagenta
     $susFiles = @()
@@ -134,7 +137,7 @@ function Find-SusFiles {
     }
 }
 
-# Find .zip and .rar files
+# Function to find .zip and .rar files
 function Find-ZipRarFiles {
     Write-Host " [-] Finding .zip and .rar files. Please wait..." -ForegroundColor DarkMagenta
     $zipRarFiles = @()
@@ -156,9 +159,10 @@ function Find-ZipRarFiles {
     return $zipRarFiles
 }
 
-# Log BAM State User Settings
+# Function to log BAM state user settings
 function List-BAMStateUserSettings {
     Write-Host " `n [-] Fetching UserSettings Entries " -ForegroundColor DarkMagenta
+
     $loggedPaths = @{ }
 
     $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings"
@@ -178,24 +182,28 @@ function List-BAMStateUserSettings {
     } else {
         Write-Host " [-] No relevant user settings found." -ForegroundColor Red
     }
+
+    # Additional checks for other entries
+    Write-Host " [-] Fetching Compatibility Assistant Entries" -ForegroundColor DarkMagenta
+    $compatRegistryPath = "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store"
+    if (Test-Path $compatRegistryPath) {
+        $compatEntries = Get-ItemProperty -Path $compatRegistryPath
+        $compatEntries.PSObject.Properties | ForEach-Object {
+            if (($_.Name -match "exe" -or $_.Name -match ".rar") -and -not $loggedPaths.ContainsKey($_.Name) -and $_.Name -notmatch "FileSyncConfig.exe|OutlookForWindows") {
+                $global:logEntries += "`n" + (Format-Output $_.Name $_.Value)
+                $loggedPaths[$_.Name] = $true
+            }
+        }
+    }
+
+    $global:logEntries = $global:logEntries | Sort-Object | Get-Unique | Where-Object { $_ -notmatch "\{.*\}" }
+    $global:logEntries | Out-File "C:\Users\$env:UserName\Desktop\log.txt"
+    Write-Host "`n[-] Completed BAMState User Settings Logging" -ForegroundColor Green
 }
 
-# Log Windows install date
-function Log-WindowsInstallDate {
-    Write-Host " [-] Logging Windows install date..." -ForegroundColor DarkMagenta
-    $os = Get-WmiObject -Class Win32_OperatingSystem
-    $installDate = $os.ConvertToDateTime($os.InstallDate)
-    $global:logEntries += "`n==============="
-    $global:logEntries += "`nWindows Installation Date: $installDate"
-}
+# Main Execution Flow
+List-BAMStateUserSettings
+Find-SusFiles
+Find-ZipRarFiles
 
-# Check for .tlscan folders in recent docs
-function Check-RecentDocsForTlscan {
-    Write-Host " [-] Checking for .tlscan folders..." -ForegroundColor DarkMagenta
-    $recentDocsPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs"
-    $tlscanFound = $false
-    if (Test-Path $recentDocsPath) {
-        $recentDocs = Get-ChildItem -Path $recentDocsPath
-        foreach ($item in $recentDocs) {
-            if ($item.PSChildName -match "\.tlscan") {
-                $tlscanFound = $
+Write-Host " [-] Script Execution Complete!" -ForegroundColor Green
