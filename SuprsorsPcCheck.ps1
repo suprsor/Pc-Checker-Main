@@ -325,5 +325,5 @@ Write-Host "$space╰───────────────────�
 
 # Print the magenta border and text
 Write-Host "$space╭─────────────────────────────────────╮" -ForegroundColor $magenta
-Write-Host "$space│          Discord @Suprsors        │" -ForegroundColor $magenta
+Write-Host "$space│          Discord @Suprsors         │" -ForegroundColor $magenta
 Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $magenta
