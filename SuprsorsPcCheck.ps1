@@ -326,12 +326,6 @@ function Main {
 
     $userProfile = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile)
     $downloadsPath = Join-Path -Path $userProfile -ChildPath "Downloads"
-    $url = "https://raw.githubusercontent.com/Reapiin/art/main/credits"
-    $content = Invoke-RestMethod -Uri $url
-
-
-
-
 
 
 }
