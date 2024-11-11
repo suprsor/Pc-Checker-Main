@@ -1,7 +1,7 @@
 
 Clear-Host
 
-$asciiArtUrl = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Art.ps1"
+$asciiArtUrl = "https://raw.githubusercontent.com/Reapiin/art/main/art.ps1"
 $asciiArtScript = Invoke-RestMethod -Uri $asciiArtUrl
 Invoke-Expression $asciiArtScript
 
