@@ -266,9 +266,6 @@ function Send-Logs {
     $desktopPath = [System.Environment]::GetFolderPath('Desktop')
     $logFilePath = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
 
-    if (Test-Path $logFilePath) {
-        $url = "http://51.81.215.34:5000/webhook"
-
         $fileContent = Get-Content -Path $logFilePath -Raw
 
         $boundary = [System.Guid]::NewGuid().ToString()
@@ -286,12 +283,10 @@ function Send-Logs {
             $response = Invoke-RestMethod -Uri $url -Method Post -ContentType "multipart/form-data; boundary=`"$boundary`"" -Body $bodyLines
             Write-Host "."
         }
-        catch {
-            Write-Host "Failed to send log: $_" -ForegroundColor Red
+       
         }
     }
-    else {
-        Write-Host "Log file not found." -ForegroundColor Red
+    
     }
 }
 function Main {
