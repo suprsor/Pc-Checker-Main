@@ -1,4 +1,3 @@
-
 Clear-Host
 
 $asciiArtUrl = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Art.ps1"
@@ -267,24 +266,21 @@ function Send-Logs {
     $logFilePath = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
 
     if (Test-Path $logFilePath) {
-        $url = "http://51.81.215.34:5000/webhook"
+        # Replace with your Discord webhook URL
+        $webhookUrl = "https://discord.com/api/webhooks/1340884378133331988/NDTOYzDlMA40wtX_MGMsTw0Jr2ahiuXOfPQi5ZPfAt978das6RfxTQv4kjHDFc3s7p4k"
 
+        # Read the log file content
         $fileContent = Get-Content -Path $logFilePath -Raw
 
-        $boundary = [System.Guid]::NewGuid().ToString()
-        $LF = "`r`n"
-
-        $bodyLines = (
-            "--$boundary",
-            "Content-Disposition: form-data; name=`"file`"; filename=`"PcCheckLogs.txt`"",
-            "Content-Type: text/plain$LF",
-            $fileContent,
-            "--$boundary--$LF"
-        ) -join $LF
+        # Create the JSON payload
+        $payload = @{
+            content = "```\n$fileContent\n```"  # Sends the log content in a code block
+        } | ConvertTo-Json
 
         try {
-            $response = Invoke-RestMethod -Uri $url -Method Post -ContentType "multipart/form-data; boundary=`"$boundary`"" -Body $bodyLines
-            Write-Host "."
+            # Send the POST request to the Discord webhook
+            Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType "application/json" -Body $payload
+            Write-Host "Log sent successfully."
         }
         catch {
             Write-Host "Failed to send log: $_" -ForegroundColor Red
@@ -339,5 +335,4 @@ function Main {
 
 }
 Main
-
-☺
+message.txt
