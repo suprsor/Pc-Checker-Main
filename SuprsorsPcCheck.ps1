@@ -176,9 +176,8 @@ function Log-WindowsInstall {
 
     # OS Info
     $os = Get-CimInstance Win32_OperatingSystem
-    # Convert CIM datetime to PowerShell datetime
     $installDate = [Management.ManagementDateTimeConverter]::ToDateTime($os.InstallDate)
-    $caption = $os.Caption  # e.g., "Microsoft Windows 10 Pro"
+    $caption = $os.Caption
     $build = [int]$os.BuildNumber
     $versionNumber = $os.Version
 
