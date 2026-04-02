@@ -288,7 +288,7 @@ Generate-Summary
 # Copy log to clipboard
 if (Test-Path $outputFile) {
     Set-Clipboard -Path $outputFile
-    Write-Host "Log copied to clipboard." -ForegroundColor Cyan
+    Write-Host "Log copied to clipboard. Please open up your Discord, and navigate to your direct messages with the user Pc-Checking You, and press Ctrl+V, or paste the the message thats been inserted into your Clipboard." -ForegroundColor Cyan
 }
 
 Write-Host "`n=============================="
