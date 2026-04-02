@@ -16,7 +16,6 @@ $banner = @"
 ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝
 "@
 
-# Print banner (centered-ish)
 $padding = " " * 10
 $banner.Split("`n") | ForEach-Object {
     Write-Host "$padding$_" -ForegroundColor $primary
@@ -46,12 +45,13 @@ function Write-Log {
 }
 
 # -------------------------
-# Risk Helper
+# Findings Helper
 # -------------------------
 function Add-Finding {
     param($path, $reason)
 
-    if (-not $global:Findings.Contains("$path|$reason")) {
+    $key = "$path|$reason"
+    if (-not $global:Findings.Contains($key)) {
         $global:Findings += "$path -> $reason"
     }
 }
@@ -73,15 +73,17 @@ function Get-OneDrivePath {
 }
 
 # -------------------------
-# Signature Check (NEW)
+# Signature Check (FIXED)
 # -------------------------
 function Check-Signature {
-    param($file)
+    param($item)
 
     try {
-        $sig = Get-AuthenticodeSignature $file
-        if ($sig.Status -ne "Valid") {
-            Add-Finding $file "Unsigned/Invalid Signature"
+        if (-not $item.PSIsContainer) {
+            $sig = Get-AuthenticodeSignature $item.FullName
+            if ($sig.Status -ne "Valid") {
+                Add-Finding $item.FullName "Unsigned/Invalid Signature"
+            }
         }
     } catch {}
 }
@@ -140,7 +142,7 @@ function Find-Files {
                     $global:Logged[$_.FullName] = $true
 
                     # Checks
-                    Check-Signature $_.FullName
+                    Check-Signature $_
 
                     if ($_.LastWriteTime -gt (Get-Date).AddDays(-2)) {
                         Add-Finding $_.FullName "Recently Modified"
@@ -174,7 +176,7 @@ function Find-SusFiles {
 }
 
 # -------------------------
-# Registry Execution Logs (IMPROVED + MUI)
+# Registry Execution Logs (WITH MUI)
 # -------------------------
 function Log-RegistryExecution {
     Write-Host "Logging registry traces..." -ForegroundColor Magenta
@@ -261,7 +263,7 @@ function Log-R6Users {
 }
 
 # -------------------------
-# Final Risk Summary (NEW)
+# Final Summary (NEW)
 # -------------------------
 function Generate-Summary {
     Write-Log "`n===================="
