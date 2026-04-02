@@ -291,9 +291,7 @@ if (Test-Path $outputFile) {
     Write-Host "Log copied to clipboard." -ForegroundColor Cyan
 }
 
-# Final message
-Write-Host "`n╭────────────────────────────╮" -ForegroundColor Red
-Write-Host "│       SCAN COMPLETE        │" -ForegroundColor Red
-Write-Host "╰────────────────────────────╯" -ForegroundColor Red
-
-Write-Host "`Discord @suprsor" -ForegroundColor Magenta
+Write-Host "`n=============================="
+Write-Host "       SCAN COMPLETE          "
+Write-Host "=============================="
+Write-Host "Discord @suprsors"
