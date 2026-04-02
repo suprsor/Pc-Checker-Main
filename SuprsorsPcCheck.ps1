@@ -352,7 +352,7 @@ Generate-Summary
 
 # Copy log to clipboard
 if (Test-Path $outputFile) {
-    Set-Clipboard -Path $outputFile
+    Get-Content $outputFile -Raw | Set-Clipboard
     Show-Progress "Log copied to clipboard" 100
 }
 
