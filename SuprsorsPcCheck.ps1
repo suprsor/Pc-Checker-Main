@@ -1,19 +1,17 @@
+# -------------------------
+# UTF-8 FIX (MUST BE FIRST)
+# -------------------------
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [System.Text.Encoding]::UTF8
 chcp 65001 | Out-Null
 
-# Now your script starts
-Clear-Host
-$host.UI.RawUI.WindowTitle = "Created By: Suprsors on Discord"
 # Clear the PowerShell window and set title
 Clear-Host
-$host.UI.RawUI.WindowTitle = "Created By: Suprsors on Discord"
+$host.UI.RawUI.WindowTitle = "Created By: Suprsor on Discord"
 
-# Colors
-$primary = "Cyan"
-$accent = "Magenta"
-
-# ASCII Banner
+# -------------------------
+# ASCII BANNER
+# -------------------------
 $banner = @"
 ███████╗██╗ ██████╗ ██████╗ ██╗
 ██╔════╝██║██╔═══██╗██╔══██╗██║
@@ -23,20 +21,18 @@ $banner = @"
 ╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝
 "@
 
-$padding = " " * 10
 $banner.Split("`n") | ForEach-Object {
-    Write-Host "$padding$_" -ForegroundColor $primary
+    Write-Host $_ -ForegroundColor Cyan
 }
 
-Write-Host ""
-Write-Host "$padding PC Check Tool Initialized..." -ForegroundColor $accent
-Write-Host ""
+Write-Host "`nPC Check Tool Initialized`n" -ForegroundColor Magenta
 
-# Output file
+# -------------------------
+# OUTPUT SETUP
+# -------------------------
 $desktopPath = [System.Environment]::GetFolderPath('Desktop')
 $outputFile = Join-Path $desktopPath "PcCheckLogs.txt"
 
-# Reset log
 if (Test-Path $outputFile) { Clear-Content $outputFile }
 
 # Globals
@@ -44,16 +40,13 @@ $global:Logged = @{}
 $global:Findings = @()
 
 # -------------------------
-# Logging Helper
+# LOGGING
 # -------------------------
 function Write-Log {
     param($text)
     Add-Content $outputFile $text
 }
 
-# -------------------------
-# Findings Helper
-# -------------------------
 function Add-Finding {
     param($path, $reason)
 
@@ -64,7 +57,7 @@ function Add-Finding {
 }
 
 # -------------------------
-# OneDrive Path Detection
+# ONEDRIVE
 # -------------------------
 function Get-OneDrivePath {
     try {
@@ -74,13 +67,11 @@ function Get-OneDrivePath {
             if (Test-Path $alt) { $path = $alt }
         }
         return $path
-    } catch {
-        return $null
-    }
+    } catch { return $null }
 }
 
 # -------------------------
-# Signature Check (FIXED)
+# SIGNATURE CHECK (FIXED)
 # -------------------------
 function Check-Signature {
     param($item)
@@ -96,7 +87,7 @@ function Check-Signature {
 }
 
 # -------------------------
-# Prefetch Scanner
+# PREFETCH
 # -------------------------
 function Log-PrefetchFiles {
     Write-Host "Scanning Prefetch..." -ForegroundColor Cyan
@@ -122,17 +113,20 @@ function Log-PrefetchFiles {
 }
 
 # -------------------------
-# File Scanner (Optimized)
+# FILE SCAN (FAST + SMART)
 # -------------------------
 function Find-Files {
     Write-Host "Scanning for files..." -ForegroundColor Yellow
 
-    $extensions = @("*.exe","*.rar","*.tlscan","*.cfg")
-    $searchPaths = @()
+    $extensions = @(".exe",".rar",".tlscan",".cfg")
 
-    Get-PSDrive -PSProvider FileSystem | ForEach-Object {
-        $searchPaths += $_.Root
-    }
+    # Focused scan paths (FAST)
+    $searchPaths = @(
+        "$env:USERPROFILE\Downloads",
+        "$env:USERPROFILE\Desktop",
+        "$env:APPDATA",
+        "$env:LOCALAPPDATA"
+    )
 
     $oneDrive = Get-OneDrivePath
     if ($oneDrive) { $searchPaths += $oneDrive }
@@ -142,21 +136,23 @@ function Find-Files {
 
     foreach ($path in $searchPaths) {
         if (Test-Path $path) {
-            Get-ChildItem -Path $path -Recurse -Include $extensions -ErrorAction SilentlyContinue | ForEach-Object {
+            Get-ChildItem -Path $path -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object {
 
-                if (-not $global:Logged.ContainsKey($_.FullName)) {
-                    Write-Log $_.FullName
-                    $global:Logged[$_.FullName] = $true
+                if ($extensions -contains $_.Extension.ToLower()) {
 
-                    # Checks
-                    Check-Signature $_
+                    if (-not $global:Logged.ContainsKey($_.FullName)) {
+                        Write-Log $_.FullName
+                        $global:Logged[$_.FullName] = $true
 
-                    if ($_.LastWriteTime -gt (Get-Date).AddDays(-2)) {
-                        Add-Finding $_.FullName "Recently Modified"
-                    }
+                        Check-Signature $_
 
-                    if ($_.Name -match "loader|inject|hack|cheat") {
-                        Add-Finding $_.FullName "Suspicious Name"
+                        if ($_.LastWriteTime -gt (Get-Date).AddDays(-2)) {
+                            Add-Finding $_.FullName "Recently Modified"
+                        }
+
+                        if ($_.Name -match "loader|inject|hack|cheat") {
+                            Add-Finding $_.FullName "Suspicious Name"
+                        }
                     }
                 }
             }
@@ -165,7 +161,7 @@ function Find-Files {
 }
 
 # -------------------------
-# Suspicious Name Scanner
+# SUSPICIOUS NAME SCAN
 # -------------------------
 function Find-SusFiles {
     Write-Host "Checking suspicious names..." -ForegroundColor Red
@@ -183,7 +179,7 @@ function Find-SusFiles {
 }
 
 # -------------------------
-# Registry Execution Logs (WITH MUI)
+# REGISTRY (WITH MUI)
 # -------------------------
 function Log-RegistryExecution {
     Write-Host "Logging registry traces..." -ForegroundColor Magenta
@@ -217,7 +213,7 @@ function Log-RegistryExecution {
 }
 
 # -------------------------
-# Browser Detection
+# BROWSERS
 # -------------------------
 function Log-Browsers {
     $path = "HKLM:\SOFTWARE\Clients\StartMenuInternet"
@@ -233,7 +229,7 @@ function Log-Browsers {
 }
 
 # -------------------------
-# Windows Install Date
+# WINDOWS INSTALL
 # -------------------------
 function Log-WindowsInstall {
     $os = Get-WmiObject Win32_OperatingSystem
@@ -244,7 +240,7 @@ function Log-WindowsInstall {
 }
 
 # -------------------------
-# R6 Username Grabber
+# R6 USERS
 # -------------------------
 function Log-R6Users {
     $user = $env:UserName
@@ -270,7 +266,7 @@ function Log-R6Users {
 }
 
 # -------------------------
-# Final Summary (NEW)
+# SUMMARY
 # -------------------------
 function Generate-Summary {
     Write-Log "`n===================="
@@ -283,7 +279,7 @@ function Generate-Summary {
 }
 
 # -------------------------
-# RUN EVERYTHING
+# RUN
 # -------------------------
 Log-RegistryExecution
 Log-WindowsInstall
@@ -305,4 +301,4 @@ Write-Host "`n╭─────────────────────
 Write-Host "│       SCAN COMPLETE        │" -ForegroundColor Red
 Write-Host "╰────────────────────────────╯" -ForegroundColor Red
 
-Write-Host "`nDiscord @suprsors" -ForegroundColor Magenta
+Write-Host "`Discord @suprsor" -ForegroundColor Magenta
