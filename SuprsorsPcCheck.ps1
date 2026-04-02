@@ -13,18 +13,26 @@ $host.UI.RawUI.WindowTitle = "Created By: Suprsor on Discord"
 # ASCII BANNER
 # -------------------------
 $banner = @"
-Made By @suprsor/Fiori on Discord. Full code is published on my Github, or if you click the raw code link. This tool is endorsed by Arktes Armada R6 Tournament server. Discord.gg/Arktes
+███████╗██╗ ██████╗ ██████╗ ██╗
+██╔════╝██║██╔═══██╗██╔══██╗██║
+█████╗  ██║██║   ██║██████╔╝██║
+██╔══╝  ██║██║   ██║██╔══██╗██║
+██║     ██║╚██████╔╝██║  ██║██║
+╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝
+Made By @suprsor/Fiori on Discord. Full code is published on my Github. This tool is endorsed by Arktes Armada R6 Tournament server.
 "@
 
-$banner.Split("`n") | ForEach-Object { Write-Host $_ -ForegroundColor Cyan }
-Write-Host "`nFiori's Pc-Checker has began.`n" -ForegroundColor Magenta
+$banner.Split("`n") | ForEach-Object {
+    Write-Host $_ -ForegroundColor Cyan
+}
+
+Write-Host "`nFiori's Pc-Checker has begun.`n" -ForegroundColor Magenta
 
 # -------------------------
 # OUTPUT SETUP
 # -------------------------
 $desktopPath = [System.Environment]::GetFolderPath('Desktop')
 $outputFile = Join-Path $desktopPath "PcCheckLogs.txt"
-
 if (Test-Path $outputFile) { Clear-Content $outputFile }
 
 # Globals
@@ -34,8 +42,8 @@ $global:Findings = @()
 # -------------------------
 # LOGGING
 # -------------------------
-function Write-Log { param($text); Add-Content $outputFile $text }
-function Add-Finding { param($path, $reason); $key = "$path|$reason"; if (-not $global:Findings.Contains($key)) { $global:Findings += "$path -> $reason" } }
+function Write-Log { param($text) Add-Content $outputFile $text }
+function Add-Finding { param($path,$reason) $key="$path|$reason"; if (-not $global:Findings.Contains($key)) { $global:Findings += "$path -> $reason" } }
 
 # -------------------------
 # ONEDRIVE
@@ -43,13 +51,16 @@ function Add-Finding { param($path, $reason); $key = "$path|$reason"; if (-not $
 function Get-OneDrivePath {
     try {
         $path = (Get-ItemProperty "HKCU:\Software\Microsoft\OneDrive" -Name "UserFolder").UserFolder
-        if (-not $path) { $alt = Join-Path $env:UserProfile "OneDrive"; if (Test-Path $alt) { $path = $alt } }
+        if (-not $path) {
+            $alt = Join-Path $env:UserProfile "OneDrive"
+            if (Test-Path $alt) { $path = $alt }
+        }
         return $path
     } catch { return $null }
 }
 
 # -------------------------
-# SIGNATURE CHECK (FIXED)
+# SIGNATURE CHECK
 # -------------------------
 function Check-Signature {
     param($item)
@@ -67,13 +78,11 @@ function Check-Signature {
 function Log-PrefetchFiles {
     Write-Host "Scanning Prefetch..." -ForegroundColor Cyan
     $prefetchPath = "C:\Windows\Prefetch"
-
     Write-Log "`n-----------------"
     Write-Log "Prefetch Data:"
-
     if (Test-Path $prefetchPath) {
         Get-ChildItem $prefetchPath -Filter "*.pf" -ErrorAction SilentlyContinue | ForEach-Object {
-            $name = $_.Name -replace "-.*", ""
+            $name = $_.Name -replace "-.*",""
             $lastRun = $_.LastWriteTime
             Write-Log "$name : $lastRun"
             if ($lastRun -gt (Get-Date).AddDays(-2)) { Add-Finding $name "Recently Executed (Prefetch)" }
@@ -82,35 +91,24 @@ function Log-PrefetchFiles {
 }
 
 # -------------------------
-# FILE SCAN (FAST + SMART)
+# FILE SCAN
 # -------------------------
 function Find-Files {
     Write-Host "Scanning for files..." -ForegroundColor Yellow
     $extensions = @(".exe",".rar",".tlscan",".cfg")
-
-    $searchPaths = @(
-        "$env:USERPROFILE\Downloads",
-        "$env:USERPROFILE\Desktop",
-        "$env:APPDATA",
-        "$env:LOCALAPPDATA"
-    )
-
+    $searchPaths = @("$env:USERPROFILE\Downloads","$env:USERPROFILE\Desktop","$env:APPDATA","$env:LOCALAPPDATA")
     $oneDrive = Get-OneDrivePath
     if ($oneDrive) { $searchPaths += $oneDrive }
-
     Write-Log "`n-----------------"
     Write-Log "Detected Files:"
-
     foreach ($path in $searchPaths) {
         if (Test-Path $path) {
             Get-ChildItem -Path $path -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object {
                 if ($extensions -contains $_.Extension.ToLower()) {
                     if (-not $global:Logged.ContainsKey($_.FullName)) {
                         Write-Log $_.FullName
-                        $global:Logged[$_.FullName] = $true
-
+                        $global:Logged[$_.FullName]= $true
                         Check-Signature $_
-
                         if ($_.LastWriteTime -gt (Get-Date).AddDays(-2)) { Add-Finding $_.FullName "Recently Modified" }
                         if ($_.Name -match "loader|inject|hack|cheat") { Add-Finding $_.FullName "Suspicious Name" }
                     }
@@ -147,10 +145,8 @@ function Log-RegistryExecution {
         "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FeatureUsage\AppSwitched",
         "HKCR:\Local Settings\Software\Microsoft\Windows\Shell\MuiCache"
     )
-
     Write-Log "`n-----------------"
     Write-Log "Registry Execution:"
-
     foreach ($path in $paths) {
         if (Test-Path $path) {
             Get-ItemProperty $path | ForEach-Object {
@@ -158,7 +154,7 @@ function Log-RegistryExecution {
                     if ($_.Name -match "\.(exe|rar|tlscan|cfg)") {
                         if (-not $global:Logged.ContainsKey($_.Name)) {
                             Write-Log $_.Name
-                            $global:Logged[$_.Name] = $true
+                            $global:Logged[$_.Name]= $true
                             Add-Finding $_.Name "Registry Execution Trace"
                         }
                     }
@@ -179,26 +175,46 @@ function Log-Browsers {
 }
 
 # -------------------------
-# WINDOWS INSTALL + INFO
+# WINDOWS INFO (WITH SECURE BOOT)
 # -------------------------
 function Log-WindowsInstall {
     $os = Get-WmiObject Win32_OperatingSystem
     $date = $os.ConvertToDateTime($os.InstallDate)
     $version = $os.Version
-    $secureBoot = (Confirm-SecureBootUEFI) ? "Enabled" : "Disabled"
-    try { $defender = Get-MpComputerStatus } catch { $defender = $null }
-    $avStatus = if ($defender) { "Firewall: $($defender.AntivirusEnabled), RealTime: $($defender.RealTimeProtectionEnabled)" } else { "N/A" }
-
+    # Secure Boot check compatible with PS5.1
+    if (Get-Command Confirm-SecureBootUEFI -ErrorAction SilentlyContinue) {
+        if (Confirm-SecureBootUEFI) { $secureBoot = "Enabled" } else { $secureBoot = "Disabled" }
+    } else { $secureBoot = "Unknown" }
     Write-Log "`n-----------------"
     Write-Log "Windows Install Date: $date"
     Write-Log "Windows Version: $version"
-    Write-Log "Secure Boot: $secureBoot"
-    Write-Log "Antivirus Status: $avStatus"
+    Write-Log "Secure Boot Status: $secureBoot"
+    # Windows Defender / AV Info
+    try {
+        $av = Get-MpComputerStatus
+        Write-Log "Antivirus/Windows Defender Status:"
+        Write-Log "Firewall Enabled: $($av.FirewallEnabled)"
+        Write-Log "Real-Time Protection: $($av.RealTimeProtectionEnabled)"
+    } catch { Write-Log "Defender/AV Info Not Available" }
+}
 
-    if ($defender) {
-        $threats = Get-MpThreat | Select-Object ThreatName, Resources, ActionSuccess, ExecutionTime -First 10
-        Write-Log "Recent Detections:"
-        foreach ($t in $threats) { Write-Log "Name:$($t.ThreatName) | Action:$($t.ActionSuccess) | Date:$($t.ExecutionTime)" }
+# -------------------------
+# DEVICE MANAGER LOG
+# -------------------------
+function Log-Devices {
+    Write-Host "Logging Device Manager info..." -ForegroundColor Cyan
+    $categories = @("Display","Ports","HIDClass","Net","USB","Mouse")
+    Write-Log "`n-----------------"
+    Write-Log "Device Manager Info:"
+    foreach ($cat in $categories) {
+        Write-Log "`n$cat Devices:"
+        $devs = Get-PnpDevice -Class $cat -ErrorAction SilentlyContinue
+        foreach ($dev in $devs) {
+            $status = if ($dev.Status -eq "OK") {"Plugged In"} else {"Unplugged/Inactive"}
+            if ($dev.InstanceId -match "VEN_([0-9A-F]{4})") { $vid=$matches[1] } else { $vid="Unknown" }
+            if ($dev.InstanceId -match "DEV_([0-9A-F]{4})") { $pid=$matches[1] } else { $pid="Unknown" }
+            Write-Log "$($dev.Name) | $status | VID:$vid PID:$pid"
+        }
     }
 }
 
@@ -209,10 +225,8 @@ function Log-R6Users {
     $user = $env:UserName
     $oneDrive = Get-OneDrivePath
     $paths = @("C:\Users\$user\Documents\My Games\Rainbow Six - Siege","$oneDrive\Documents\My Games\Rainbow Six - Siege")
-
     Write-Log "`n-----------------"
     Write-Log "R6 Usernames:"
-
     foreach ($p in $paths) {
         if (Test-Path $p) {
             Get-ChildItem $p -Directory | ForEach-Object {
@@ -225,46 +239,16 @@ function Log-R6Users {
 }
 
 # -------------------------
-# DEVICE MANAGER LOGGING
-# -------------------------
-function Log-DeviceManager {
-    Write-Host "Logging Device Manager devices..." -ForegroundColor Cyan
-    $categories = @{
-        "DisplayAdapter" = "Display Adapters"
-        "Ports"          = "Com Ports"
-        "HIDClass"       = "HIDs"
-        "Net"            = "Network Adapters"
-        "USB"            = "Universal Serial Bus Controllers"
-        "Mouse"          = "Mice and other pointing devices"
-    }
-
-    Write-Log "`n-----------------"
-    Write-Log "Device Manager Info:"
-
-    foreach ($cat in $categories.Keys) {
-        try {
-            $devices = Get-PnpDevice -Class $cat -ErrorAction SilentlyContinue
-            Write-Log "`n$($categories[$cat]):"
-            foreach ($dev in $devices) {
-                $status = if ($dev.Status -eq "OK") { "Plugged In" } else { "Unplugged" }
-                $vid = ($dev.InstanceId -match "VEN_([0-9A-F]{4})") ? $matches[1] : "Unknown"
-                $pid = ($dev.InstanceId -match "DEV_([0-9A-F]{4})") ? $matches[1] : "Unknown"
-                Write-Log "$($dev.FriendlyName) | $status | VID:$vid PID:$pid"
-            }
-        } catch {}
-    }
-}
-
-# -------------------------
 # LOGITECH GHUB SCRIPTS
 # -------------------------
-function Log-LGHUBScripts {
-    Write-Host "Scanning Logitech GHUB scripts..." -ForegroundColor Cyan
+function Log-GHubScripts {
     $user = $env:UserName
-    $scriptPath = Join-Path -Path $env:LOCALAPPDATA -ChildPath "LGHUB\scripts"
-    Write-Log "`n-----------------"
-    Write-Log "Logitech GHUB Scripts:"
-    if (Test-Path $scriptPath) { Get-ChildItem $scriptPath -Directory | ForEach-Object { Write-Log $_.Name } } else { Write-Log "No scripts found" }
+    $path = "C:\Users\$user\AppData\Local\LGHUB\scripts"
+    if (Test-Path $path) {
+        Write-Log "`n-----------------"
+        Write-Log "Logitech GHUB Scripts:"
+        Get-ChildItem -Path $path -Directory | ForEach-Object { Write-Log $_.Name }
+    }
 }
 
 # -------------------------
@@ -287,14 +271,14 @@ Log-R6Users
 Log-PrefetchFiles
 Find-Files
 Find-SusFiles
-Log-DeviceManager
-Log-LGHUBScripts
+Log-Devices
+Log-GHubScripts
 Generate-Summary
 
 # Copy log to clipboard
 if (Test-Path $outputFile) {
     Set-Clipboard -Path $outputFile
-    Write-Host "Log copied to clipboard. Please open Discord and press Ctrl+V in the user's DM." -ForegroundColor Cyan
+    Write-Host "Log copied to clipboard." -ForegroundColor Cyan
 }
 
 Write-Host "`n=============================="
