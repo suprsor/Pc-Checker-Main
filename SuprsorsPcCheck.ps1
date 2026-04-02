@@ -211,13 +211,15 @@ function Log-Devices {
         $devs = Get-PnpDevice -Class $cat -ErrorAction SilentlyContinue
         foreach ($dev in $devs) {
             $status = if ($dev.Status -eq "OK") {"Plugged In"} else {"Unplugged/Inactive"}
-            if ($dev.InstanceId -match "VEN_([0-9A-F]{4})") { $vid=$matches[1] } else { $vid="Unknown" }
-            if ($dev.InstanceId -match "DEV_([0-9A-F]{4})") { $pid=$matches[1] } else { $pid="Unknown" }
-            Write-Log "$($dev.Name) | $status | VID:$vid PID:$pid"
+
+            # Get Vendor ID (VID) and Product ID (PID) safely
+            if ($dev.InstanceId -match "VEN_([0-9A-F]{4})") { $deviceVID = $matches[1] } else { $deviceVID = "Unknown" }
+            if ($dev.InstanceId -match "DEV_([0-9A-F]{4})") { $devicePID = $matches[1] } else { $devicePID = "Unknown" }
+
+            Write-Log "$($dev.Name) | $status | VID:$deviceVID PID:$devicePID"
         }
     }
 }
-
 # -------------------------
 # R6 USERS
 # -------------------------
