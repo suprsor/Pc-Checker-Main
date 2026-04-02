@@ -7,7 +7,7 @@ chcp 65001 | Out-Null
 
 # Clear the PowerShell window and set title
 Clear-Host
-$host.UI.RawUI.WindowTitle = "Created By: Suprsor on Discord"
+$host.UI.RawUI.WindowTitle = "Fiori's Pc-Check tool"
 
 # -------------------------
 # ASCII BANNER
