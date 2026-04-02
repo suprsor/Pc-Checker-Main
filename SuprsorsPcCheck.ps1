@@ -169,16 +169,17 @@ function Log-Browsers {
 }
 
 # -------------------------
-# WINDOWS INFO (WITH SECURE BOOT & FULL VERSION)
+# WINDOWS INFO (WITH SECURE BOOT & FULL VERSION FIXED)
 # -------------------------
 function Log-WindowsInstall {
     Write-Host "Logging Windows info..." -ForegroundColor Cyan
 
     # OS Info
     $os = Get-CimInstance Win32_OperatingSystem
-    $installDate = $os.ConvertToDateTime($os.InstallDate)
+    # Convert CIM datetime to PowerShell datetime
+    $installDate = [Management.ManagementDateTimeConverter]::ToDateTime($os.InstallDate)
     $caption = $os.Caption  # e.g., "Microsoft Windows 10 Pro"
-    $build = $os.BuildNumber
+    $build = [int]$os.BuildNumber
     $versionNumber = $os.Version
 
     # Determine H2/H1 release info
@@ -199,7 +200,7 @@ function Log-WindowsInstall {
         }
     }
 
-    $fullVersion = "$caption $release (Build $build, $versionNumber)"
+    $fullVersion = "$caption $release (Build $build, Version $versionNumber)"
 
     # Secure Boot Status
     if (Get-Command Confirm-SecureBootUEFI -ErrorAction SilentlyContinue) {
