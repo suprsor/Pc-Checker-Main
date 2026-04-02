@@ -224,6 +224,33 @@ function Log-WindowsInstall {
     Write-Log "Real-Time Protection: $realTime"
 }
 # -------------------------
+# PCIE & USB DEVICES
+# -------------------------
+function Log-PCIEandUSB {
+    Write-Host "Logging PCIe & USB devices..." -ForegroundColor Cyan
+    Write-Log "`n-----------------"
+    Write-Log "PCIE & USB Devices:"
+
+    # Get all PnP devices
+    $devices = Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -match "PCI|USB" }
+
+    foreach ($dev in $devices) {
+        $name = $dev.Name
+        $status = if ($dev.Status -eq "OK") {"Plugged In"} else {"Unplugged/Inactive"}
+
+        # Extract Vendor ID / Product ID if available
+        if ($dev.PNPDeviceID -match "VEN_([0-9A-F]{4}).*DEV_([0-9A-F]{4})") {
+            $vid = $matches[1]
+            $pid = $matches[2]
+        } else {
+            $vid = "Unknown"
+            $pid = "Unknown"
+        }
+
+        Write-Log "$name | $status | VID:$vid PID:$pid | PNPDeviceID:$($dev.PNPDeviceID)"
+    }
+}
+# -------------------------
 # DEVICE MANAGER LOG (FIXED VID/PID)
 # -------------------------
 function Log-Devices {
