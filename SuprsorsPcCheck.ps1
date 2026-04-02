@@ -13,19 +13,14 @@ $host.UI.RawUI.WindowTitle = "Created By: Suprsor on Discord"
 # ASCII BANNER
 # -------------------------
 $banner = @"
-███████╗██╗ ██████╗ ██████╗ ██╗
-██╔════╝██║██╔═══██╗██╔══██╗██║
-█████╗  ██║██║   ██║██████╔╝██║
-██╔══╝  ██║██║   ██║██╔══██╗██║
-██║     ██║╚██████╔╝██║  ██║██║
-╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝
+Made By @suprsor/Fiori on Discord. Full code is published on my Github, or if you click the raw code link. This tool is endorsed by Arktes Armada R6 Tournament server. Discord.gg/Arktes
 "@
 
 $banner.Split("`n") | ForEach-Object {
     Write-Host $_ -ForegroundColor Cyan
 }
 
-Write-Host "`nPC Check Tool Initialized`n" -ForegroundColor Magenta
+Write-Host "`nFiori's Pc-Checker has began.`n" -ForegroundColor Magenta
 
 # -------------------------
 # OUTPUT SETUP
