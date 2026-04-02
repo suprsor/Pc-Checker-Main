@@ -175,48 +175,90 @@ function Log-Browsers {
 }
 
 # -------------------------
-# WINDOWS INFO (WITH SECURE BOOT)
+# WINDOWS INFO (WITH SECURE BOOT & FULL VERSION)
 # -------------------------
 function Log-WindowsInstall {
-    $os = Get-WmiObject Win32_OperatingSystem
-    $date = $os.ConvertToDateTime($os.InstallDate)
-    $version = $os.Version
-    # Secure Boot check compatible with PS5.1
+    Write-Host "Logging Windows info..." -ForegroundColor Cyan
+
+    # OS Info
+    $os = Get-CimInstance Win32_OperatingSystem
+    $installDate = $os.ConvertToDateTime($os.InstallDate)
+    $caption = $os.Caption  # e.g., "Microsoft Windows 10 Pro"
+    $build = $os.BuildNumber
+    $versionNumber = $os.Version
+
+    # Determine H2/H1 release info
+    $release = ""
+    if ($caption -match "Windows 10") {
+        switch ($build) {
+            {$_ -ge 19044} { $release = "22H2"; break }
+            {$_ -ge 19043} { $release = "21H2"; break }
+            {$_ -ge 19042} { $release = "20H2"; break }
+            {$_ -ge 19041} { $release = "2004/20H1"; break }
+            default { $release = "Older" }
+        }
+    } elseif ($caption -match "Windows 11") {
+        switch ($build) {
+            {$_ -ge 22621} { $release = "24H2"; break }
+            {$_ -ge 22000} { $release = "21H2"; break }
+            default { $release = "Older" }
+        }
+    }
+
+    $fullVersion = "$caption $release (Build $build, $versionNumber)"
+
+    # Secure Boot Status
     if (Get-Command Confirm-SecureBootUEFI -ErrorAction SilentlyContinue) {
         if (Confirm-SecureBootUEFI) { $secureBoot = "Enabled" } else { $secureBoot = "Disabled" }
     } else { $secureBoot = "Unknown" }
-    Write-Log "`n-----------------"
-    Write-Log "Windows Install Date: $date"
-    Write-Log "Windows Version: $version"
-    Write-Log "Secure Boot Status: $secureBoot"
-    # Windows Defender / AV Info
+
+    # Windows Defender / AV Status
     try {
         $av = Get-MpComputerStatus
-        Write-Log "Antivirus/Windows Defender Status:"
-        Write-Log "Firewall Enabled: $($av.FirewallEnabled)"
-        Write-Log "Real-Time Protection: $($av.RealTimeProtectionEnabled)"
-    } catch { Write-Log "Defender/AV Info Not Available" }
-}
+        $firewall = if ($av.FirewallEnabled) {"Enabled"} else {"Disabled"}
+        $realTime = if ($av.RealTimeProtectionEnabled) {"Enabled"} else {"Disabled"}
+    } catch {
+        $firewall = "Unknown"
+        $realTime = "Unknown"
+    }
 
+    # Log everything
+    Write-Log "`n-----------------"
+    Write-Log "Windows Install Date: $installDate"
+    Write-Log "Windows Version: $fullVersion"
+    Write-Log "Secure Boot Status: $secureBoot"
+    Write-Log "Firewall Status: $firewall"
+    Write-Log "Real-Time Protection: $realTime"
+}
 # -------------------------
-# DEVICE MANAGER LOG
+# DEVICE MANAGER LOG (FIXED VID/PID)
 # -------------------------
 function Log-Devices {
     Write-Host "Logging Device Manager info..." -ForegroundColor Cyan
     $categories = @("Display","Ports","HIDClass","Net","USB","Mouse")
     Write-Log "`n-----------------"
     Write-Log "Device Manager Info:"
+
     foreach ($cat in $categories) {
         Write-Log "`n$cat Devices:"
         $devs = Get-PnpDevice -Class $cat -ErrorAction SilentlyContinue
+
         foreach ($dev in $devs) {
+            # Default values
+            $deviceVID = "Unknown"
+            $devicePID = "Unknown"
             $status = if ($dev.Status -eq "OK") {"Plugged In"} else {"Unplugged/Inactive"}
 
-            # Get Vendor ID (VID) and Product ID (PID) safely
-            if ($dev.InstanceId -match "VEN_([0-9A-F]{4})") { $deviceVID = $matches[1] } else { $deviceVID = "Unknown" }
-            if ($dev.InstanceId -match "DEV_([0-9A-F]{4})") { $devicePID = $matches[1] } else { $devicePID = "Unknown" }
+            # Try to extract VID/PID from InstanceId
+            if ($dev.InstanceId -match "VEN_([0-9A-F]{4}).*DEV_([0-9A-F]{4})") {
+                $deviceVID = $matches[1]
+                $devicePID = $matches[2]
+            }
 
-            Write-Log "$($dev.Name) | $status | VID:$deviceVID PID:$devicePID"
+            # Only log if we have at least one valid VID or PID
+            if ($deviceVID -ne "Unknown" -or $devicePID -ne "Unknown") {
+                Write-Log "$($dev.Name) | $status | VID:$deviceVID PID:$devicePID"
+            }
         }
     }
 }
