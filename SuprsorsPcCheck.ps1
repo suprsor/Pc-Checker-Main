@@ -185,22 +185,25 @@ function Log-Browsers {
 # -------------------------
 function Log-WindowsInstall {
     Show-Progress "Logging Windows info" 33
+
+    # Get Install Date from registry (reliable)
     $regPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
-    $installDateEpoch = (Get-ItemProperty $regPath).InstallDate
-    $installDate = Get-Date ([System.DateTimeOffset]::FromUnixTimeSeconds($installDateEpoch).DateTime) 
+    try {
+        $installDateEpoch = (Get-ItemProperty $regPath).InstallDate
+        $installDate = Get-Date ([System.DateTimeOffset]::FromUnixTimeSeconds($installDateEpoch).DateTime)
+    } catch {
+        $installDate = "Unknown"
+    }
+
     Write-Host "Windows Install Date: $installDate"
 
+    # OS Info
     $os = Get-CimInstance Win32_OperatingSystem
     $caption = $os.Caption
     $build = [int]$os.BuildNumber
     $versionNumber = $os.Version
 
-    try {
-        if ($os.InstallDate -and $os.InstallDate -ne "") {
-            $installDate = [Management.ManagementDateTimeConverter]::ToDateTime($os.InstallDate)
-        } else { $installDate = "Unknown" }
-    } catch { $installDate = "Unknown" }
-
+    # Release determination
     $release = ""
     if ($caption -match "Windows 10") {
         switch ($build) {
@@ -219,10 +222,13 @@ function Log-WindowsInstall {
     }
 
     $fullVersion = "$caption $release (Build $build, Version $versionNumber)"
+
+    # Secure Boot
     if (Get-Command Confirm-SecureBootUEFI -ErrorAction SilentlyContinue) {
-        if (Confirm-SecureBootUEFI) { $secureBoot = "Enabled" } else { $secureBoot = "Disabled" }
+        $secureBoot = if (Confirm-SecureBootUEFI) {"Enabled"} else {"Disabled"}
     } else { $secureBoot = "Unknown" }
 
+    # Windows Defender
     try {
         $av = Get-MpComputerStatus
         $firewall = if ($av.FirewallEnabled) {"Enabled"} else {"Disabled"}
@@ -232,6 +238,7 @@ function Log-WindowsInstall {
         $realTime = "Unknown"
     }
 
+    # Log everything
     Write-Log "`n-----------------"
     Write-Log "Windows Install Date: $installDate"
     Write-Log "Windows Version: $fullVersion"
