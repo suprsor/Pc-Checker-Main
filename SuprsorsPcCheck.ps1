@@ -174,6 +174,11 @@ function Log-Browsers {
 function Log-WindowsInstall {
     Write-Host "Logging Windows info..." -ForegroundColor Cyan
 
+# Simple Install Date Grab
+$regPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+$installDateEpoch = (Get-ItemProperty $regPath).InstallDate
+$installDate = Get-Date ([System.DateTimeOffset]::FromUnixTimeSeconds($installDateEpoch).DateTime) 
+Write-Host "Windows Install Date: $installDate"
     # OS Info
     $os = Get-CimInstance Win32_OperatingSystem
     $caption = $os.Caption
