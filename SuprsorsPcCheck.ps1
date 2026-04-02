@@ -13,20 +13,14 @@ $host.UI.RawUI.WindowTitle = "Created By: Suprsor on Discord"
 # ASCII BANNER
 # -------------------------
 $banner = @"
-███████╗██╗ ██████╗ ██████╗ ██╗
-██╔════╝██║██╔═══██╗██╔══██╗██║
-█████╗  ██║██║   ██║██████╔╝██║
-██╔══╝  ██║██║   ██║██╔══██╗██║
-██║     ██║╚██████╔╝██║  ██║██║
-╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝
-Made By @suprsor/Fiori on Discord. Full code is published on my Github. This tool is endorsed by Arktes Armada R6 Tournament server.
+Made By @suprsor/Fiori on Discord. Full code is published on my Github. 
 "@
 
 $banner.Split("`n") | ForEach-Object {
     Write-Host $_ -ForegroundColor Cyan
 }
 
-Write-Host "`nFiori's Pc-Checker has begun.`n" -ForegroundColor Magenta
+Write-Host "`nStarting...`n" -ForegroundColor Magenta
 
 # -------------------------
 # OUTPUT SETUP
