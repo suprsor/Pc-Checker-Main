@@ -9,6 +9,29 @@ $outputFile = Join-Path $desktopPath "PcCheckLogs.txt"
 # Reset log
 if (Test-Path $outputFile) { Clear-Content $outputFile }
 
+# Globals
+$global:Logged = @{}
+$global:Findings = @()
+
+# -------------------------
+# Logging Helper
+# -------------------------
+function Write-Log {
+    param($text)
+    Add-Content $outputFile $text
+}
+
+# -------------------------
+# Risk Helper
+# -------------------------
+function Add-Finding {
+    param($path, $reason)
+
+    if (-not $global:Findings.Contains("$path|$reason")) {
+        $global:Findings += "$path -> $reason"
+    }
+}
+
 # -------------------------
 # OneDrive Path Detection
 # -------------------------
@@ -26,33 +49,52 @@ function Get-OneDrivePath {
 }
 
 # -------------------------
+# Signature Check (NEW)
+# -------------------------
+function Check-Signature {
+    param($file)
+
+    try {
+        $sig = Get-AuthenticodeSignature $file
+        if ($sig.Status -ne "Valid") {
+            Add-Finding $file "Unsigned/Invalid Signature"
+        }
+    } catch {}
+}
+
+# -------------------------
 # Prefetch Scanner
 # -------------------------
 function Log-PrefetchFiles {
     Write-Host "Scanning Prefetch..." -ForegroundColor Cyan
     $prefetchPath = "C:\Windows\Prefetch"
 
-    Add-Content $outputFile "`n-----------------"
-    Add-Content $outputFile "Prefetch Data:"
+    Write-Log "`n-----------------"
+    Write-Log "Prefetch Data:"
 
     if (Test-Path $prefetchPath) {
         Get-ChildItem $prefetchPath -Filter "*.pf" -ErrorAction SilentlyContinue | ForEach-Object {
-            $name = $_.Name -replace "-.*", ""   # Clean app name
+            $name = $_.Name -replace "-.*", ""
             $lastRun = $_.LastWriteTime
-            Add-Content $outputFile "$name : $lastRun"
+
+            Write-Log "$name : $lastRun"
+
+            if ($lastRun -gt (Get-Date).AddDays(-2)) {
+                Add-Finding $name "Recently Executed (Prefetch)"
+            }
         }
     } else {
-        Add-Content $outputFile "Prefetch not accessible"
+        Write-Log "Prefetch not accessible"
     }
 }
 
 # -------------------------
-# File Scanner (Expanded)
+# File Scanner (Optimized)
 # -------------------------
 function Find-Files {
     Write-Host "Scanning for files..." -ForegroundColor Yellow
 
-    $extensions = "*.exe","*.rar","*.tlscan","*.cfg"
+    $extensions = @("*.exe","*.rar","*.tlscan","*.cfg")
     $searchPaths = @()
 
     Get-PSDrive -PSProvider FileSystem | ForEach-Object {
@@ -62,13 +104,28 @@ function Find-Files {
     $oneDrive = Get-OneDrivePath
     if ($oneDrive) { $searchPaths += $oneDrive }
 
-    Add-Content $outputFile "`n-----------------"
-    Add-Content $outputFile "Detected Files:"
+    Write-Log "`n-----------------"
+    Write-Log "Detected Files:"
 
     foreach ($path in $searchPaths) {
-        foreach ($ext in $extensions) {
-            Get-ChildItem -Path $path -Recurse -Filter $ext -ErrorAction SilentlyContinue | ForEach-Object {
-                Add-Content $outputFile $_.FullName
+        if (Test-Path $path) {
+            Get-ChildItem -Path $path -Recurse -Include $extensions -ErrorAction SilentlyContinue | ForEach-Object {
+
+                if (-not $global:Logged.ContainsKey($_.FullName)) {
+                    Write-Log $_.FullName
+                    $global:Logged[$_.FullName] = $true
+
+                    # Checks
+                    Check-Signature $_.FullName
+
+                    if ($_.LastWriteTime -gt (Get-Date).AddDays(-2)) {
+                        Add-Finding $_.FullName "Recently Modified"
+                    }
+
+                    if ($_.Name -match "loader|inject|hack|cheat") {
+                        Add-Finding $_.FullName "Suspicious Name"
+                    }
+                }
             }
         }
     }
@@ -85,15 +142,15 @@ function Find-SusFiles {
         $sus = $content | Where-Object { $_ -match "loader.*\.exe" }
 
         if ($sus) {
-            Add-Content $outputFile "`n-----------------"
-            Add-Content $outputFile "Suspicious Files:"
-            $sus | ForEach-Object { Add-Content $outputFile $_ }
+            Write-Log "`n-----------------"
+            Write-Log "Suspicious Files:"
+            $sus | ForEach-Object { Write-Log $_ }
         }
     }
 }
 
 # -------------------------
-# Registry Execution Logs
+# Registry Execution Logs (IMPROVED + MUI)
 # -------------------------
 function Log-RegistryExecution {
     Write-Host "Logging registry traces..." -ForegroundColor Magenta
@@ -101,18 +158,24 @@ function Log-RegistryExecution {
     $paths = @(
         "HKLM:\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings",
         "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store",
-        "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FeatureUsage\AppSwitched"
+        "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FeatureUsage\AppSwitched",
+        "HKCR:\Local Settings\Software\Microsoft\Windows\Shell\MuiCache"
     )
 
-    Add-Content $outputFile "`n-----------------"
-    Add-Content $outputFile "Registry Execution:"
+    Write-Log "`n-----------------"
+    Write-Log "Registry Execution:"
 
     foreach ($path in $paths) {
         if (Test-Path $path) {
             Get-ItemProperty $path | ForEach-Object {
                 $_.PSObject.Properties | ForEach-Object {
                     if ($_.Name -match "\.(exe|rar|tlscan|cfg)") {
-                        Add-Content $outputFile $_.Name
+
+                        if (-not $global:Logged.ContainsKey($_.Name)) {
+                            Write-Log $_.Name
+                            $global:Logged[$_.Name] = $true
+                            Add-Finding $_.Name "Registry Execution Trace"
+                        }
                     }
                 }
             }
@@ -126,12 +189,12 @@ function Log-RegistryExecution {
 function Log-Browsers {
     $path = "HKLM:\SOFTWARE\Clients\StartMenuInternet"
 
-    Add-Content $outputFile "`n-----------------"
-    Add-Content $outputFile "Browsers:"
+    Write-Log "`n-----------------"
+    Write-Log "Browsers:"
 
     if (Test-Path $path) {
         Get-ChildItem $path | ForEach-Object {
-            Add-Content $outputFile $_.Name
+            Write-Log $_.Name
         }
     }
 }
@@ -143,8 +206,8 @@ function Log-WindowsInstall {
     $os = Get-WmiObject Win32_OperatingSystem
     $date = $os.ConvertToDateTime($os.InstallDate)
 
-    Add-Content $outputFile "`n-----------------"
-    Add-Content $outputFile "Windows Install Date: $date"
+    Write-Log "`n-----------------"
+    Write-Log "Windows Install Date: $date"
 }
 
 # -------------------------
@@ -159,17 +222,30 @@ function Log-R6Users {
         "$oneDrive\Documents\My Games\Rainbow Six - Siege"
     )
 
-    Add-Content $outputFile "`n-----------------"
-    Add-Content $outputFile "R6 Usernames:"
+    Write-Log "`n-----------------"
+    Write-Log "R6 Usernames:"
 
     foreach ($p in $paths) {
         if (Test-Path $p) {
             Get-ChildItem $p -Directory | ForEach-Object {
-                Add-Content $outputFile $_.Name
+                Write-Log $_.Name
                 Start-Process "https://stats.cc/siege/$($_.Name)"
                 Start-Sleep 0.5
             }
         }
+    }
+}
+
+# -------------------------
+# Final Risk Summary (NEW)
+# -------------------------
+function Generate-Summary {
+    Write-Log "`n===================="
+    Write-Log "Findings Summary"
+    Write-Log "===================="
+
+    foreach ($f in $global:Findings) {
+        Write-Log $f
     }
 }
 
@@ -183,6 +259,7 @@ Log-R6Users
 Log-PrefetchFiles
 Find-Files
 Find-SusFiles
+Generate-Summary
 
 # Copy log to clipboard
 if (Test-Path $outputFile) {
