@@ -15,12 +15,23 @@ $host.UI.RawUI.WindowTitle = "Fiori's Pc-Check tool"
 $banner = @"
 Made By @suprsor/Fiori on Discord. Full code is published on my Github. 
 "@
-
 $banner.Split("`n") | ForEach-Object {
     Write-Host $_ -ForegroundColor Cyan
 }
 
-Write-Host "`nStarting...`n" -ForegroundColor Magenta
+# -------------------------
+# PROGRESS HELPER
+# -------------------------
+function Show-Progress {
+    param(
+        [string]$Message,
+        [double]$Percent
+    )
+    $percentText = "{0:N1}%%" -f $Percent
+    Write-Host "$Message... $percentText" -ForegroundColor Green
+}
+
+Show-Progress "Starting" 0
 
 # -------------------------
 # OUTPUT SETUP
@@ -70,7 +81,7 @@ function Check-Signature {
 # PREFETCH
 # -------------------------
 function Log-PrefetchFiles {
-    Write-Host "Scanning Prefetch..." -ForegroundColor Cyan
+    Show-Progress "Scanning Prefetch" 44
     $prefetchPath = "C:\Windows\Prefetch"
     Write-Log "`n-----------------"
     Write-Log "Prefetch Data:"
@@ -88,7 +99,7 @@ function Log-PrefetchFiles {
 # FILE SCAN
 # -------------------------
 function Find-Files {
-    Write-Host "Scanning for files..." -ForegroundColor Yellow
+    Show-Progress "Scanning for files" 55
     $extensions = @(".exe",".rar",".tlscan",".cfg")
     $searchPaths = @("$env:USERPROFILE\Downloads","$env:USERPROFILE\Desktop","$env:APPDATA","$env:LOCALAPPDATA")
     $oneDrive = Get-OneDrivePath
@@ -116,7 +127,7 @@ function Find-Files {
 # SUSPICIOUS NAME SCAN
 # -------------------------
 function Find-SusFiles {
-    Write-Host "Checking suspicious names..." -ForegroundColor Red
+    Show-Progress "Checking suspicious names" 66
     if (Test-Path $outputFile) {
         $content = Get-Content $outputFile
         $sus = $content | Where-Object { $_ -match "loader.*\.exe" }
@@ -132,7 +143,7 @@ function Find-SusFiles {
 # REGISTRY (WITH MUI)
 # -------------------------
 function Log-RegistryExecution {
-    Write-Host "Logging registry traces..." -ForegroundColor Magenta
+    Show-Progress "Logging registry traces" 11
     $paths = @(
         "HKLM:\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings",
         "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store",
@@ -162,6 +173,7 @@ function Log-RegistryExecution {
 # BROWSERS
 # -------------------------
 function Log-Browsers {
+    Show-Progress "Logging Browsers" 22
     $path = "HKLM:\SOFTWARE\Clients\StartMenuInternet"
     Write-Log "`n-----------------"
     Write-Log "Browsers:"
@@ -169,34 +181,26 @@ function Log-Browsers {
 }
 
 # -------------------------
-# WINDOWS INFO (WITH SECURE BOOT & FULL VERSION FIXED)
+# WINDOWS INFO
 # -------------------------
 function Log-WindowsInstall {
-    Write-Host "Logging Windows info..." -ForegroundColor Cyan
+    Show-Progress "Logging Windows info" 33
+    $regPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+    $installDateEpoch = (Get-ItemProperty $regPath).InstallDate
+    $installDate = Get-Date ([System.DateTimeOffset]::FromUnixTimeSeconds($installDateEpoch).DateTime) 
+    Write-Host "Windows Install Date: $installDate"
 
-# Simple Install Date Grab
-$regPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
-$installDateEpoch = (Get-ItemProperty $regPath).InstallDate
-$installDate = Get-Date ([System.DateTimeOffset]::FromUnixTimeSeconds($installDateEpoch).DateTime) 
-Write-Host "Windows Install Date: $installDate"
-    # OS Info
     $os = Get-CimInstance Win32_OperatingSystem
     $caption = $os.Caption
     $build = [int]$os.BuildNumber
     $versionNumber = $os.Version
 
-    # Convert InstallDate safely
     try {
         if ($os.InstallDate -and $os.InstallDate -ne "") {
             $installDate = [Management.ManagementDateTimeConverter]::ToDateTime($os.InstallDate)
-        } else {
-            $installDate = "Unknown"
-        }
-    } catch {
-        $installDate = "Unknown"
-    }
+        } else { $installDate = "Unknown" }
+    } catch { $installDate = "Unknown" }
 
-    # Determine H2/H1 release info
     $release = ""
     if ($caption -match "Windows 10") {
         switch ($build) {
@@ -215,13 +219,10 @@ Write-Host "Windows Install Date: $installDate"
     }
 
     $fullVersion = "$caption $release (Build $build, Version $versionNumber)"
-
-    # Secure Boot Status
     if (Get-Command Confirm-SecureBootUEFI -ErrorAction SilentlyContinue) {
         if (Confirm-SecureBootUEFI) { $secureBoot = "Enabled" } else { $secureBoot = "Disabled" }
     } else { $secureBoot = "Unknown" }
 
-    # Windows Defender / AV Status
     try {
         $av = Get-MpComputerStatus
         $firewall = if ($av.FirewallEnabled) {"Enabled"} else {"Disabled"}
@@ -231,7 +232,6 @@ Write-Host "Windows Install Date: $installDate"
         $realTime = "Unknown"
     }
 
-    # Log everything
     Write-Log "`n-----------------"
     Write-Log "Windows Install Date: $installDate"
     Write-Log "Windows Version: $fullVersion"
@@ -239,69 +239,55 @@ Write-Host "Windows Install Date: $installDate"
     Write-Log "Firewall Status: $firewall"
     Write-Log "Real-Time Protection: $realTime"
 }
+
 # -------------------------
 # PCIE & USB DEVICES
 # -------------------------
 function Log-PCIEandUSB {
-    Write-Host "Logging PCIe & USB devices..." -ForegroundColor Cyan
+    Show-Progress "Logging PCIe & USB devices" 77
     Write-Log "`n-----------------"
     Write-Log "PCIE & USB Devices:"
-
-    # Get all PnP devices
     $devices = Get-CimInstance Win32_PnPEntity | Where-Object { $_.PNPDeviceID -match "PCI|USB" }
-
     foreach ($dev in $devices) {
         $name = $dev.Name
         $status = if ($dev.Status -eq "OK") {"Plugged In"} else {"Unplugged/Inactive"}
-
-        # Extract Vendor ID / Product ID if available
         if ($dev.PNPDeviceID -match "VEN_([0-9A-F]{4}).*DEV_([0-9A-F]{4})") {
             $vid = $matches[1]
             $pid = $matches[2]
-        } else {
-            $vid = "Unknown"
-            $pid = "Unknown"
-        }
-
+        } else { $vid = "Unknown"; $pid = "Unknown" }
         Write-Log "$name | $status | VID:$vid PID:$pid | PNPDeviceID:$($dev.PNPDeviceID)"
     }
 }
+
 # -------------------------
-# DEVICE MANAGER LOG (FIXED VID/PID)
+# DEVICE MANAGER
 # -------------------------
 function Log-Devices {
-    Write-Host "Logging Device Manager info..." -ForegroundColor Cyan
+    Show-Progress "Logging Device Manager info" 88
     $categories = @("Display","Ports","HIDClass","Net","USB","Mouse")
     Write-Log "`n-----------------"
     Write-Log "Device Manager Info:"
-
     foreach ($cat in $categories) {
         Write-Log "`n$cat Devices:"
         $devs = Get-PnpDevice -Class $cat -ErrorAction SilentlyContinue
-
         foreach ($dev in $devs) {
-            # Default values
-            $deviceVID = "Unknown"
-            $devicePID = "Unknown"
+            $deviceVID = "Unknown"; $devicePID = "Unknown"
             $status = if ($dev.Status -eq "OK") {"Plugged In"} else {"Unplugged/Inactive"}
-
-            # Try to extract VID/PID from InstanceId
             if ($dev.InstanceId -match "VEN_([0-9A-F]{4}).*DEV_([0-9A-F]{4})") {
-                $deviceVID = $matches[1]
-                $devicePID = $matches[2]
+                $deviceVID = $matches[1]; $devicePID = $matches[2]
             }
-
-            # Only log if we have at least one valid VID or PID
             if ($deviceVID -ne "Unknown" -or $devicePID -ne "Unknown") {
                 Write-Log "$($dev.Name) | $status | VID:$deviceVID PID:$devicePID"
             }
         }
     }
 }
+
 # -------------------------
 # R6 USERS
 # -------------------------
 function Log-R6Users {
+    Show-Progress "Logging R6 Users" 33
     $user = $env:UserName
     $oneDrive = Get-OneDrivePath
     $paths = @("C:\Users\$user\Documents\My Games\Rainbow Six - Siege","$oneDrive\Documents\My Games\Rainbow Six - Siege")
@@ -322,6 +308,7 @@ function Log-R6Users {
 # LOGITECH GHUB SCRIPTS
 # -------------------------
 function Log-GHubScripts {
+    Show-Progress "Logging GHUB Scripts" 95
     $user = $env:UserName
     $path = "C:\Users\$user\AppData\Local\LGHUB\scripts"
     if (Test-Path $path) {
@@ -335,6 +322,7 @@ function Log-GHubScripts {
 # SUMMARY
 # -------------------------
 function Generate-Summary {
+    Show-Progress "Generating Summary" 99
     Write-Log "`n===================="
     Write-Log "Findings Summary"
     Write-Log "===================="
@@ -358,7 +346,7 @@ Generate-Summary
 # Copy log to clipboard
 if (Test-Path $outputFile) {
     Set-Clipboard -Path $outputFile
-    Write-Host "Log copied to clipboard." -ForegroundColor Cyan
+    Show-Progress "Log copied to clipboard" 100
 }
 
 Write-Host "`n=============================="
