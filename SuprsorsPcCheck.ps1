@@ -2,6 +2,30 @@
 Clear-Host
 $host.UI.RawUI.WindowTitle = "Created By: Suprsors on Discord"
 
+# Colors
+$primary = "Cyan"
+$accent = "Magenta"
+
+# ASCII Banner
+$banner = @"
+███████╗██╗ ██████╗ ██████╗ ██╗
+██╔════╝██║██╔═══██╗██╔══██╗██║
+█████╗  ██║██║   ██║██████╔╝██║
+██╔══╝  ██║██║   ██║██╔══██╗██║
+██║     ██║╚██████╔╝██║  ██║██║
+╚═╝     ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝
+"@
+
+# Print banner (centered-ish)
+$padding = " " * 10
+$banner.Split("`n") | ForEach-Object {
+    Write-Host "$padding$_" -ForegroundColor $primary
+}
+
+Write-Host ""
+Write-Host "$padding PC Check Tool Initialized..." -ForegroundColor $accent
+Write-Host ""
+
 # Output file
 $desktopPath = [System.Environment]::GetFolderPath('Desktop')
 $outputFile = Join-Path $desktopPath "PcCheckLogs.txt"
