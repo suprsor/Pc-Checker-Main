@@ -180,6 +180,17 @@ function Log-WindowsInstall {
     $build = [int]$os.BuildNumber
     $versionNumber = $os.Version
 
+    # Convert InstallDate safely
+    try {
+        if ($os.InstallDate -and $os.InstallDate -ne "") {
+            $installDate = [Management.ManagementDateTimeConverter]::ToDateTime($os.InstallDate)
+        } else {
+            $installDate = "Unknown"
+        }
+    } catch {
+        $installDate = "Unknown"
+    }
+
     # Determine H2/H1 release info
     $release = ""
     if ($caption -match "Windows 10") {
